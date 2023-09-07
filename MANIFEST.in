@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include blogadmin *.css
+recursive-include blogadmin *.csv
+recursive-include blogadmin *.html
+recursive-include blogadmin *.ico
+recursive-include blogadmin *.js
+recursive-include blogadmin *.json
+recursive-include blogadmin *.md
+recursive-include blogadmin *.png
+recursive-include blogadmin *.py
+recursive-include blogadmin *.svg
+recursive-include blogadmin *.txt
+recursive-exclude blogadmin *.pyc
