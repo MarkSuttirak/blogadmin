@@ -155,7 +155,7 @@ const BlogPosts = () => {
                           )}</td>
                           <td className="relative whitespace-nowrap py-4 flex gap-x-3 justify-end pr-4">
                             <Link className='btn secondary-btn' to={`/view-post/${d.name}`}>View</Link>
-                            <button className='btn secondary-btn'>Edit</button>
+                            <Link className='btn secondary-btn' to={`/blog-posts/edit/${d.name}`}>Edit</Link>
                             <button className='btn primary-btn error' onClick={() => openToDeleteBlog(index, d.title)}>Delete</button>
                           </td>
                         </tr>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFrappeGetDoc, useFrappeUpdateDoc } from 'frappe-react-sdk';
 import LoadingCircle from '../components/loading';
 import { Link, useParams } from 'react-router-dom';
@@ -8,19 +8,23 @@ import { XCircleIcon, CheckCircleIcon, XMarkIcon, ChevronRightIcon } from '@hero
 const ViewPost = () => {
   const { id } = useParams()
 
-  const { data, isLoading, error } = useFrappeGetDoc('Blog Post', id, {
+  const { data, isLoading, error, mutate } = useFrappeGetDoc('Blog Post', id, {
     fields: ['name', 'title', 'content', 'published_on']
   })
 
-  const { updateDoc } = useFrappeUpdateDoc('published')
+  const { updateDoc } = useFrappeUpdateDoc()
 
-  const publishPost = (data = 1) => {
-    updateDoc('Blog Post', 'published', data)
+  const publishPost = () => {
+    updateDoc('Blog Post', id, ['published', 1])
   }
 
-  const unpublishPost = (data = 0) => {
-    updateDoc('Blog Post', 'published', data)
+  const unpublishPost = () => {
+    updateDoc('Blog Post', id, ['published', 0])
   }
+
+  useEffect(() => {
+    mutate()
+  }, [])
   return (
     <>
       <div className='page-section'>

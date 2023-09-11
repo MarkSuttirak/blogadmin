@@ -1,12 +1,19 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { Dialog, Transition } from '@headlessui/react'
 import { XCircleIcon, CheckCircleIcon, XMarkIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import { HomeSmile } from '@untitled-ui/icons-react/build/cjs';
-import { useFrappeCreateDoc, useFrappeGetDocList, useFrappeFileUpload } from "frappe-react-sdk";
-import { Fragment, useState } from "react";
+import { useFrappeCreateDoc, useFrappeGetDoc, useFrappeGetDocList, useFrappeUpdateDoc } from "frappe-react-sdk";
+import { Fragment, useEffect, useState } from "react";
 import { useForm } from 'react-hook-form'
+import LoadingCircle from "../components/loading";
 
-const AddBlog = () => {
+const EditBlog = () => {
+  const { id } = useParams();
+
+  const { data, isLoading, error, mutate } = useFrappeGetDoc('Blog Post', id, {
+    fields: ['name', 'title', 'content', 'blog_category', 'published_on', 'blogger', 'published']
+  })
+
   const { data:dataCate } = useFrappeGetDocList('Blog Category', {
     fields: ['name', 'title']
   })
@@ -15,17 +22,15 @@ const AddBlog = () => {
     fields: ['name', 'full_name']
   })
 
-  const { upload } = useFrappeFileUpload();
-
   const { register, handleSubmit, formState: {errors} } = useForm()
 
-  const { createDoc, loading } = useFrappeCreateDoc()
+  const { updateDoc, loading } = useFrappeUpdateDoc()
 
   const [showSavePost, setShowSavePost] = useState(false);
   const [showError, setShowError] = useState(false);
 
-  const createPost = (data) => {
-    createDoc('Blog Post', data)
+  const updatePost = (data) => {
+    updateDoc('Blog Post', id, data)
     .then(() => {
       setShowSavePost(true);
       setShowError(false)
@@ -37,6 +42,10 @@ const AddBlog = () => {
       }, 10000)
     })
   }
+
+  useEffect(() => {
+    mutate(id)
+  }, [id])
 
   return (
     <>
@@ -62,76 +71,92 @@ const AddBlog = () => {
               <div className="flex items-center">
                 <ChevronRightIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
                 <p className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
-                  Add Post
+                  Edit Post
                 </p>
               </div>
             </li>
           </ol>
         </nav>
-        <form onSubmit={handleSubmit(createPost)}>
-          <div className="flex items-center justify-between mb-8">
-            <h1 className="main-title">Add Post</h1>
-            <div className="flex gap-x-4">
-              <button
-                className="btn primary-btn"
-              >
-                {loading ? 'Publishing...' : 'Publish'}
-              </button>
-              <button
-                type='submit'
-                className="btn primary-btn"
-              >
-                {loading ? 'Saving...' : 'Save'}
-              </button>
+        {data && (
+          <form onSubmit={handleSubmit(updatePost)}>
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="main-title">Edit Post: {data.title}</h1>
+              <div className="flex gap-x-4">
+                <button
+                  type='submit'
+                  className="btn primary-btn"
+                  {...register('published')}
+                >
+                  {loading ? 'Publishing...' : 'Publish'}
+                </button>
+                <button
+                  type='submit'
+                  className="btn primary-btn"
+                >
+                  {loading ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-4">
+              <div>
+                <label htmlFor='title' className="subheading">Title</label>
+                <input type='text' id='title' name='title' defaultValue={data.title} className="form-input" {...register('title')} />
+              </div>
+
+              <div>
+                <label htmlFor='cate-title' className="subheading">Category</label>
+                {dataCate && (
+                  <select className="form-input" id='cate-title' name='blog_category' {...register('blog_category')} defaultValue={dataCate.name}>
+                    {dataCate.map((d) => 
+                      <option value={d.name}>{d.title}</option>
+                    )}
+                  </select>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label htmlFor='content' className="subheading">Content</label>
+              <textarea id='content' name='content' className="form-input" defaultValue={data.content} style={{height:"200px"}} {...register('content')} />
+            </div>
+
+            <div className="grid grid-cols-2 gap-x-4 mt-4">
+              <div>
+                <label htmlFor='published_on' className="subheading">Published on</label>
+                <input type='date' id='published_on' name='published_on' defaultValue={data.published_on} className="form-input" {...register('published_on')} />
+              </div>
+
+              <div>
+                <label htmlFor='blogger' className="subheading">Blogger</label>
+                {dataBlogger && (
+                  <select className="form-input" id='blogger' name='blogger' {...register('blogger')} defaultValue={dataBlogger.name}>
+                    {dataBlogger.map((d) => 
+                      <option value={d.name}>{d.name}</option>
+                    )}
+                  </select>
+                )}
+              </div>
+            </div>
+          </form>
+        )}
+
+        {isLoading && (
+          <LoadingCircle size={80} innerSize={70}/>
+        )}
+
+        {error && (
+          <div className="rounded-md bg-red-50 p-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">There was an error loading the post, please try again.</h3>
+              </div>
             </div>
           </div>
-
-          <div className="grid grid-cols-2 gap-x-4">
-            <div>
-              <label htmlFor='title' className="subheading">Title</label>
-              <input type='text' id='title' name='title' className="form-input" {...register('title')}/>
-            </div>
-
-            <div>
-              <label htmlFor='cate-title' className="subheading">Category</label>
-              {dataCate && (
-                <select className="form-input" id='cate-title' name='blog_category' {...register('blog_category')} defaultValue={dataCate.name}>
-                  {dataCate.map((d) => 
-                    <option value={d.name}>{d.title}</option>
-                  )}
-                </select>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <label htmlFor='content' className="subheading">Content</label>
-            <textarea id='content' name='content' className="form-input" style={{height:"200px"}} {...register('content')}/>
-          </div>
-
-          <div className="grid grid-cols-2 gap-x-4 mt-4">
-            <div>
-              <label htmlFor='published_on' className="subheading">Published on</label>
-              <input type='date' id='published_on' name='published_on' className="form-input" {...register('published_on')}/>
-            </div>
-
-            <div>
-              <label htmlFor='blogger' className="subheading">Blogger</label>
-              {dataBlogger && (
-                <select className="form-input" id='blogger' name='blogger' {...register('blogger')} defaultValue={dataBlogger.name}>
-                  {dataBlogger.map((d) => 
-                    <option value={d.name}>{d.name}</option>
-                  )}
-                </select>
-              )}
-            </div>
-          </div>
-
-          {/* <div className="mt-4">
-            <label htmlFor='published_on' className="subheading">Attach Image</label><br/>
-            <input type='file' {...register('meta_image')}/>
-          </div> */}
-        </form>
+        )}
       </div>
 
       {/* A notification when creating a post */}
@@ -161,7 +186,7 @@ const AddBlog = () => {
                       </div>
                       <div className="ml-3 w-0 flex-1 pt-0.5">
                         <p className="text-sm font-medium text-gray-900">An error occurred</p>
-                        <p className="mt-1 text-sm text-gray-500">There has been an error creating the post, please try again.</p>
+                        <p className="mt-1 text-sm text-gray-500">There has been an error updating the post, please try again.</p>
                       </div>
                     </>
                   ) : (
@@ -170,8 +195,8 @@ const AddBlog = () => {
                         <CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />
                       </div>
                       <div className="ml-3 w-0 flex-1 pt-0.5">
-                        <p className="text-sm font-medium text-gray-900">Post created</p>
-                        <p className="mt-1 text-sm text-gray-500">A post has been successfully created.</p>
+                        <p className="text-sm font-medium text-gray-900">Post updated</p>
+                        <p className="mt-1 text-sm text-gray-500">This post has been successfully updated.</p>
                       </div>
                     </>
                   )}
@@ -197,4 +222,4 @@ const AddBlog = () => {
   )
 }
 
-export default AddBlog;
+export default EditBlog;
