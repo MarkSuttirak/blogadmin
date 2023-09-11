@@ -3,15 +3,36 @@ import Sidebar from '../components/sidebar';
 import LoadingCircle from '../components/loading';
 import { useLayoutEffect, Fragment, useRef, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
-import { XCircleIcon, CheckCircleIcon, XMarkIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
+import { XCircleIcon, CheckCircleIcon, XMarkIcon, ChevronRightIcon, ChevronLeftIcon } from '@heroicons/react/20/solid'
 import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom';
 import { HomeSmile } from '@untitled-ui/icons-react/build/cjs';
 
 const BlogPosts = () => {
+  const [currentPage, setCurrentPage] = useState(0)
+  const [limitCate, setLimitCate] = useState(5)
+
   const { data, isLoading, error, mutate } = useFrappeGetDocList('Blog Category', {
-    fields: ['name','title','image']
+    fields: ['name','title','image'],
+    limit_start: limitCate * currentPage,
+    limit: limitCate
   })
+
+  const { data:allCate } = useFrappeGetDocList('Blog Category')
+
+  const goPrevPage = () => {
+    if (currentPage > 0){
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const goNextPage = () => {
+    if (allCate){
+      if (currentPage < Math.ceil(allCate.length / limitCate) - 1){
+        setCurrentPage(currentPage + 1)
+      }
+    }
+  }
 
   const [rowNum, setRowNum] = useState(null);
   const [rowName, setRowName] = useState(null)
@@ -218,6 +239,37 @@ const BlogPosts = () => {
                       ))}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-gray-200 bg-white py-3">
+              <div className="flex flex-1 items-center justify-between">
+                {allCate && (
+                  <div>
+                    <p className="text-sm text-gray-700">
+                      Showing <span className="font-medium">{(currentPage * limitCate) + 1}</span> to <span className="font-medium">{currentPage == Math.ceil(allCate.length / limitCate) - 1 ? allCate.length : limitCate * (currentPage + 1)}</span> of{' '}
+                      <span className="font-medium">{allCate.length}</span> {allCate.length == 1 ? 'result' : 'results'}
+                    </p>
+                  </div>
+                )}
+                <div>
+                  <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                    <button
+                      onClick={goPrevPage}
+                      className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20"
+                    >
+                      <span className="sr-only">Previous</span>
+                      <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                    <button
+                      onClick={goNextPage}
+                      className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20"
+                    >
+                      <span className="sr-only">Next</span>
+                      <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </nav>
                 </div>
               </div>
             </div>

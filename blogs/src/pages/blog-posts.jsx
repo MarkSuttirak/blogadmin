@@ -2,18 +2,41 @@ import { useFrappeDeleteDoc, useFrappeFileUpload, useFrappeGetDocList } from 'fr
 import Sidebar from '../components/sidebar';
 import LoadingCircle from '../components/loading';
 import { Dialog, Transition } from '@headlessui/react'
-import { XCircleIcon, CheckCircleIcon, XMarkIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
+import { XCircleIcon, CheckCircleIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useRef, useState, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { HomeSmile } from '@untitled-ui/icons-react/build/cjs';
 import { useForm } from 'react-hook-form';
 
 const BlogPosts = () => {
+  const [currentPage, setCurrentPage] = useState(0)
+  const [limitData, setLimitData] = useState(5)
+
   const { data, isLoading, error, mutate } = useFrappeGetDocList('Blog Post', {
-    fields: ['name','title','blog_category','published_on','published']
+    fields: ['name','title','blog_category','published_on','published'],
+    limit_start: limitData * currentPage,
+    limit: limitData
   })
 
+  const { data:allData } = useFrappeGetDocList('Blog Post')
+
+  const goPrevPage = () => {
+    if (currentPage > 0){
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const goNextPage = () => {
+    if (allData){
+      if (currentPage < Math.ceil(allData.length / limitData) - 1){
+        setCurrentPage(currentPage + 1)
+      }
+    }
+  }
+
   const { deleteDoc, loading } = useFrappeDeleteDoc()
+
+  const [showDeleteNotification, setShowDeleteNotification] = useState(false)
 
   const cancelButtonRef = useRef(null)
   const { register, handleSubmit, formState: {errors} } = useForm()
@@ -52,8 +75,18 @@ const BlogPosts = () => {
     .then(() => {
       mutate();
       setOpenDeleteBlog(false);
+      setShowDeleteNotification(true);
+      setShowError(false);
+      setTimeout(() => {
+        setShowDeleteNotification(false)
+      }, 10000)
     }).catch(() => {
       setOpenDeleteBlog(false);
+      setShowDeleteNotification(true);
+      setShowError(true);
+      setTimeout(() => {
+        setShowDeleteNotification(false)
+      }, 10000)
     })
   }
 
@@ -165,6 +198,37 @@ const BlogPosts = () => {
                 </div>
               </div>
             </div>
+
+            <div className="flex items-center justify-between border-t border-gray-200 bg-white py-3">
+              <div className="flex flex-1 items-center justify-between">
+                {allData && (
+                  <div>
+                    <p className="text-sm text-gray-700">
+                      Showing <span className="font-medium">{(currentPage * limitData) + 1}</span> to <span className="font-medium">{currentPage == Math.ceil(allData.length / limitData) - 1 ? allData.length : limitData * (currentPage + 1)}</span> of{' '}
+                      <span className="font-medium">{allData.length}</span> {allData.length == 1 ? 'result' : 'results'}
+                    </p>
+                  </div>
+                )}
+                <div>
+                  <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                    <button
+                      onClick={goPrevPage}
+                      className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20"
+                    >
+                      <span className="sr-only">Previous</span>
+                      <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                    <button
+                      onClick={goNextPage}
+                      className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20"
+                    >
+                      <span className="sr-only">Next</span>
+                      <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </div>
           </div>
         )}
         {isLoading && (
@@ -244,6 +308,66 @@ const BlogPosts = () => {
           </div>
         </Dialog>
       </Transition.Root>
+
+            {/* The nofitication for confirmation of deleting a blog category */}
+            <div
+        aria-live="assertive"
+        className="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6 z-[999]"
+      >
+        <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
+          {/* Notification panel, dynamically insert this into the live region when it needs to be displayed */}
+          <Transition
+            show={showDeleteNotification}
+            as={Fragment}
+            enter="transform ease-out duration-300 transition"
+            enterFrom="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+            enterTo="translate-y-0 opacity-100 sm:translate-x-0"
+            leave="transition ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+              <div className="p-4">
+                <div className="flex items-start">
+                  {showError ? (
+                    <>
+                      <div className="flex-shrink-0">
+                        <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+                      </div>
+                      <div className="ml-3 w-0 flex-1 pt-0.5">
+                        <p className="text-sm font-medium text-gray-900">An error occurred</p>
+                        <p className="mt-1 text-sm text-gray-500">There has been an error deleting the post, please try again.</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex-shrink-0">
+                        <CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />
+                      </div>
+                      <div className="ml-3 w-0 flex-1 pt-0.5">
+                        <p className="text-sm font-medium text-gray-900">Blog deleted</p>
+                        <p className="mt-1 text-sm text-gray-500">This blog has been successfully deleted.</p>
+                      </div>
+                    </>
+                  )}
+                  <div className="ml-4 flex flex-shrink-0">
+                    <button
+                      type="button"
+                      className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      onClick={() => {
+                        setShowDeleteNotification(false)
+                      }}
+                    >
+                      <span className="sr-only">Close</span>
+                      <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Transition>
+        </div>
+      </div>
     </>
   )
 }
