@@ -12,6 +12,8 @@ const BlogPosts = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const [limitData, setLimitData] = useState(5)
 
+  const [showError, setShowError] = useState(false)
+
   const { data, isLoading, error, mutate } = useFrappeGetDocList('Blog Post', {
     fields: ['name','title','blog_category','published_on','published'],
     limit_start: limitData * currentPage,
