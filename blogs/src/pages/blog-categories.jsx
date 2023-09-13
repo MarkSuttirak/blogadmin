@@ -20,6 +20,8 @@ const BlogPosts = () => {
 
   const { data:allCate } = useFrappeGetDocList('Blog Category')
 
+  const [defaultCate, setDefaultCate] = useState('');
+
   const goPrevPage = () => {
     if (currentPage > 0){
       setCurrentPage(currentPage - 1)
@@ -156,19 +158,21 @@ const BlogPosts = () => {
 
   const PaginationNum = () => {
     if (allCate){
-      const allCates = Math.ceil(allCate.length / limitCate);
-      let num = 0;
+      const allPages = Math.ceil(allCate.length / limitCate);
       let pages = []
 
-      while (num < allCates){
+      const goToPage = (pageNum) => {
+        setCurrentPage(pageNum);
+      }
+
+      for (let i = 0; i < allPages; i++){
         pages.push(
-          <button onClick={(index) => setCurrentPage(index)}
-            className={`relative inline-flex items-center border bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20 ${currentPage == num ? 'border-[#0099FF] z-10' : 'border-gray-300'}`}
+          <button key={i} onClick={() => goToPage(i)}
+            className={`relative inline-flex items-center border bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20 ${currentPage == i ? 'border-[#0099FF] z-10' : 'border-gray-300'}`}
           >
-            {num + 1}
+            {i + 1}
           </button>
         )
-        num++
       }
 
       return pages;
@@ -253,7 +257,7 @@ const BlogPosts = () => {
                             {d.title}
                           </td>
                           <td className="relative whitespace-nowrap py-4 flex gap-x-3 justify-end pr-4">
-                            <button className='btn secondary-btn' onClick={() => openToUpdateCate(index, d.title)}>Edit</button>
+                            <button className='btn secondary-btn' onClick={() => {openToUpdateCate(index, d.title);setDefaultCate(d.title)}}>Edit</button>
                             <button className='btn primary-btn error' onClick={() => openToDeleteCate(index, d.title)}>Delete</button>
                           </td>
                         </tr>
@@ -430,6 +434,7 @@ const BlogPosts = () => {
                             id="edit-cate"
                             className="form-input"
                             placeholder='Enter the category name'
+                            defaultValue={defaultCate}
                             {...register('title', {
                               required: 'This field is required.',
                             })}

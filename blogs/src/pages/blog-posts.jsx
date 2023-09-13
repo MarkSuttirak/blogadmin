@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form';
 
 const BlogPosts = () => {
   const [currentPage, setCurrentPage] = useState(0)
-  const [limitData, setLimitData] = useState(3)
+  const [limitData, setLimitData] = useState(5)
 
   const [showError, setShowError] = useState(false)
 
@@ -96,18 +96,20 @@ const BlogPosts = () => {
   const PaginationNum = () => {
     if (allData){
       const allPages = Math.ceil(allData.length / limitData);
-      let num = 0;
       let pages = []
 
-      while (num < allPages){
+      const goToPage = (pageNum) => {
+        setCurrentPage(pageNum);
+      }
+
+      for (let i = 0; i < allPages; i++){
         pages.push(
-          <button onClick={(index) => setCurrentPage(index)}
-            className={`relative inline-flex items-center border bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20 ${currentPage == num ? 'border-[#0099FF] z-10' : 'border-gray-300'}`}
+          <button key={i} onClick={() => goToPage(i)}
+            className={`relative inline-flex items-center border bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20 ${currentPage == i ? 'border-[#0099FF] z-10' : 'border-gray-300'}`}
           >
-            {num + 1}
+            {i + 1}
           </button>
         )
-        num++
       }
 
       return pages;

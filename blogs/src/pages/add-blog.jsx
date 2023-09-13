@@ -20,6 +20,7 @@ const AddBlog = () => {
   const { register, handleSubmit, formState: {errors} } = useForm()
 
   const { createDoc, loading } = useFrappeCreateDoc()
+  const { createDoc:createPublish, loading:loadingPublish } = useFrappeCreateDoc()
 
   const [showSavePost, setShowSavePost] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -76,7 +77,7 @@ const AddBlog = () => {
                 {...register('published')}
                 className="btn primary-btn"
               >
-                {loading ? 'Publishing...' : 'Publish'}
+                {loadingPublish ? 'Publishing...' : 'Publish'}
               </button>
               <button
                 type='submit'

@@ -1,17 +1,38 @@
 import { useFrappeGetDocList } from 'frappe-react-sdk'
-import Sidebar from '../components/sidebar';
-import { Button, Heading, Table, Thead, Tbody, Tr, Th, Td, TableCaption, TableContainer, Stack, HStack, Alert, AlertIcon, AlertTitle, AlertDescription } from '@chakra-ui/react';
 import LoadingCircle from '../components/loading';
-import { XCircleIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
+import { XCircleIcon, CheckCircleIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { HomeSmile } from '@untitled-ui/icons-react/build/cjs';
 
 const BlogPostsDraft = () => {
+  const [currentPage, setCurrentPage] = useState(0)
+  const [limitData, setLimitData] = useState(5)
+
   const { data, isLoading, error } = useFrappeGetDocList('Blog Post', {
     fields: ['name','title','blog_category','published_on'],
-    filters: [['published','=','false']]
+    filters: [['published','=','false']],
+    limit_start: limitData * currentPage,
+    limit: limitData
   })
+
+  const { data:allData, mutate:mutateAll } = useFrappeGetDocList('Blog Post', {
+    filters: [['published','=','false']],
+  })
+
+  const goPrevPage = () => {
+    if (currentPage > 0){
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const goNextPage = () => {
+    if (allData){
+      if (currentPage < Math.ceil(allData.length / limitData) - 1){
+        setCurrentPage(currentPage + 1)
+      }
+    }
+  }
 
   const checkbox = useRef()
   const [checked, setChecked] = useState(false)
@@ -29,6 +50,29 @@ const BlogPostsDraft = () => {
     setSelectedData(checked || indeterminate ? [] : data)
     setChecked(!checked && !indeterminate)
     setIndeterminate(false)
+  }
+
+  const PaginationNum = () => {
+    if (allData){
+      const allPages = Math.ceil(allData.length / limitData);
+      let pages = []
+
+      const goToPage = (pageNum) => {
+        setCurrentPage(pageNum);
+      }
+
+      for (let i = 0; i < allPages; i++){
+        pages.push(
+          <button key={i} onClick={() => goToPage(i)}
+            className={`relative inline-flex items-center border bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20 ${currentPage == i ? 'border-[#0099FF] z-10' : 'border-gray-300'}`}
+          >
+            {i + 1}
+          </button>
+        )
+      }
+
+      return pages;
+    }
   }
 
   return (
@@ -124,6 +168,40 @@ const BlogPostsDraft = () => {
                       ))}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-gray-200 bg-white py-3">
+              <div className="flex flex-1 items-center justify-between">
+                {allData && (
+                  <div>
+                    <p className="text-sm text-gray-700">
+                      Showing <span className="font-medium">{(currentPage * limitData) + 1}</span> to <span className="font-medium">{currentPage == Math.ceil(allData.length / limitData) - 1 ? allData.length : limitData * (currentPage + 1)}</span> of{' '}
+                      <span className="font-medium">{allData.length}</span> {allData.length == 1 ? 'result' : 'results'}
+                    </p>
+                  </div>
+                )}
+                <div>
+                  <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                    <button
+                      onClick={goPrevPage}
+                      className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50"
+                    >
+                      <span className="sr-only">Previous</span>
+                      <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+
+                    <PaginationNum />
+
+                    <button
+                      onClick={goNextPage}
+                      className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50"
+                    >
+                      <span className="sr-only">Next</span>
+                      <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </nav>
                 </div>
               </div>
             </div>

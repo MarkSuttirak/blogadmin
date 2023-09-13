@@ -27,6 +27,7 @@ const EditBlog = () => {
   const { register, handleSubmit, watch, formState: {errors} } = useForm()
 
   const { updateDoc, loading } = useFrappeUpdateDoc()
+  const { updateDoc:updatePublish, loading:loadingPublish } = useFrappeUpdateDoc()
 
   const [showSavePost, setShowSavePost] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -46,6 +47,10 @@ const EditBlog = () => {
         setShowSavePost(false)
       }, 10000)
     })
+  }
+
+  const publishPost = (data) => {
+    updatePublish('Blog Post', id, data)
   }
 
   useEffect(() => {
@@ -96,7 +101,7 @@ const EditBlog = () => {
                   className="btn primary-btn"
                   {...register('published')}
                 >
-                  {loading ? 'Publishing...' : 'Publish'}
+                  {loadingPublish ? 'Publishing...' : 'Publish'}
                 </button>
                 <button
                   type='submit'
