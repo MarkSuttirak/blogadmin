@@ -95,6 +95,7 @@ const EditBlog = () => {
                 <button
                   type='submit'
                   className="btn primary-btn"
+                  {...register('published')}
                 >
                   {loading ? 'Publishing...' : 'Publish'}
                 </button>

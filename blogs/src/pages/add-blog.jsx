@@ -73,7 +73,7 @@ const AddBlog = () => {
             <h1 className="main-title">Add Post</h1>
             <div className="flex gap-x-4">
               <button
-                {...register('published', 1)}
+                {...register('published')}
                 className="btn primary-btn"
               >
                 {loading ? 'Publishing...' : 'Publish'}
