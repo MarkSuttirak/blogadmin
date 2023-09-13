@@ -35,27 +35,24 @@ const EditBlog = () => {
   const [date, setDate] = useState(data && data.published_on)
 
   const updatePost = (data) => {
-    console.log(watch(data))
-    // updateDoc('Blog Post', id, data)
-    // .then(() => {
-    //   setShowSavePost(true);
-    //   setShowError(false)
-    // }).catch(() => {
-    //   setShowSavePost(true);
-    //   setShowError(true)
-    //   setTimeout(() => {
-    //     setShowSavePost(false)
-    //   }, 10000)
-    // })
+    updateDoc('Blog Post', id, data)
+    .then(() => {
+      setShowSavePost(true);
+      setShowError(false)
+    }).catch(() => {
+      setShowSavePost(true);
+      setShowError(true)
+      setTimeout(() => {
+        setShowSavePost(false)
+      }, 10000)
+    })
   }
 
   useEffect(() => {
-    if (typeof id !== undefined || typeof id !== null){
-      setTimeout(() => {
-        mutate(id);
-      }, 1)
+    if (id){
+      mutate();
     }
-  }, [id])
+  }, [])
 
   return (
     <>
