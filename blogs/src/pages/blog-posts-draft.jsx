@@ -1,23 +1,28 @@
-import { useFrappeGetDocList } from 'frappe-react-sdk'
+import { useFrappeDeleteDoc, useFrappeFileUpload, useFrappeGetDocList } from 'frappe-react-sdk'
+import Sidebar from '../components/sidebar';
 import LoadingCircle from '../components/loading';
+import { Dialog, Transition } from '@headlessui/react'
 import { XCircleIcon, CheckCircleIcon, XMarkIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
-import { useRef, useState } from 'react';
+import { useRef, useState, Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { HomeSmile } from '@untitled-ui/icons-react/build/cjs';
+import { useForm } from 'react-hook-form';
 
 const BlogPostsDraft = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const [limitData, setLimitData] = useState(5)
 
-  const { data, isLoading, error } = useFrappeGetDocList('Blog Post', {
-    fields: ['name','title','blog_category','published_on'],
-    filters: [['published','=','false']],
+  const [showError, setShowError] = useState(false)
+
+  const { data, isLoading, error, mutate } = useFrappeGetDocList('Blog Post', {
+    fields: ['name','title','blog_category','published_on','published'],
+    filters: [['published', '=', 'false']],
     limit_start: limitData * currentPage,
     limit: limitData
   })
 
   const { data:allData, mutate:mutateAll } = useFrappeGetDocList('Blog Post', {
-    filters: [['published','=','false']],
+    filters: [['published', '=', 'false']],
   })
 
   const goPrevPage = () => {
@@ -33,6 +38,18 @@ const BlogPostsDraft = () => {
       }
     }
   }
+
+  const { deleteDoc, loading } = useFrappeDeleteDoc()
+
+  const [showDeleteNotification, setShowDeleteNotification] = useState(false)
+
+  const cancelButtonRef = useRef(null)
+  const { register, handleSubmit, formState: {errors} } = useForm()
+
+  const [rowNum, setRowNum] = useState(null);
+  const [rowName, setRowName] = useState(null);
+
+  const [openDeleteBlog, setOpenDeleteBlog] = useState(false);
 
   const checkbox = useRef()
   const [checked, setChecked] = useState(false)
@@ -50,6 +67,33 @@ const BlogPostsDraft = () => {
     setSelectedData(checked || indeterminate ? [] : data)
     setChecked(!checked && !indeterminate)
     setIndeterminate(false)
+  }
+
+  const openToDeleteBlog = (index, name) => {
+    setRowName(name);
+    setRowNum(index);
+    setOpenDeleteBlog(true);
+  }
+
+  const deleteBlog = (info) => {
+    deleteDoc('Blog Post', data[rowNum].name, info)
+    .then(() => {
+      mutate();
+      mutateAll();
+      setOpenDeleteBlog(false);
+      setShowDeleteNotification(true);
+      setShowError(false);
+      setTimeout(() => {
+        setShowDeleteNotification(false)
+      }, 10000)
+    }).catch(() => {
+      setOpenDeleteBlog(false);
+      setShowDeleteNotification(true);
+      setShowError(true);
+      setTimeout(() => {
+        setShowDeleteNotification(false)
+      }, 10000)
+    })
   }
 
   const PaginationNum = () => {
@@ -99,11 +143,11 @@ const BlogPostsDraft = () => {
         </nav>
         <div className="flex items-center justify-between mb-8">
           <h1 className="main-title">Draft Blog Posts</h1>
-          <button
+          <Link to='/blog-posts/add'
             className="btn primary-btn"
           >
             Add Post
-          </button>
+          </Link>
         </div>
         {data && (
           <div className="flex flex-col">
@@ -137,7 +181,7 @@ const BlogPostsDraft = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 bg-white">
-                      {data.map((d) => (
+                      {data.map((d, index) => (
                         <tr key={d.name}>
                           <td className="relative w-12 px-6 sm:w-16 sm:px-8">
                             <input
@@ -160,9 +204,9 @@ const BlogPostsDraft = () => {
                           <td className="table-desc">{d.blog_category}</td>
                           <td className="table-desc">{d.published_on}</td>
                           <td className="relative whitespace-nowrap py-4 flex gap-x-3 justify-end pr-4">
-                            <button className='btn secondary-btn'>View</button>
-                            <button className='btn secondary-btn'>Edit</button>
-                            <button className='btn primary-btn error'>Delete</button>
+                            <Link className='btn secondary-btn' to={`/view-post/${d.name}`}>View</Link>
+                            <Link className='btn secondary-btn' to={`/blog-posts/edit/${d.name}`}>Edit</Link>
+                            <button className='btn primary-btn error' onClick={() => openToDeleteBlog(index, d.title)}>Delete</button>
                           </td>
                         </tr>
                       ))}
@@ -223,6 +267,126 @@ const BlogPostsDraft = () => {
             </div>
           </div>
         )}
+      </div>
+
+      <Transition.Root show={openDeleteBlog} as={Fragment}>
+        <Dialog as="div" className="relative z-[999]" initialFocus={cancelButtonRef} onClose={setOpenDeleteBlog}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                  <form onSubmit={handleSubmit(deleteBlog)}>
+                    <div className="bg-white p-6">
+                      <div className="text-left">
+                        <label htmlFor='add-cate' className="main-heading">
+                          Delete Blog: {rowName}
+                        </label>
+                        <div className="mt-4">
+                          <p>Are you sure to delete this blog? This action cannot be undone.</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 py-4 flex px-6 justify-end gap-x-3">
+                      <button
+                        className="btn white-outline-btn"
+                        onClick={(e) => {e.preventDefault();setOpenDeleteBlog(false)}}
+                        ref={cancelButtonRef}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type='submit'
+                        className="btn primary-btn error"
+                      >
+                        {loading ? 'Deleting' : 'Delete'}
+                      </button>
+                    </div>
+                  </form>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
+
+            {/* The nofitication for confirmation of deleting a blog category */}
+            <div
+        aria-live="assertive"
+        className="pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6 z-[999]"
+      >
+        <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
+          {/* Notification panel, dynamically insert this into the live region when it needs to be displayed */}
+          <Transition
+            show={showDeleteNotification}
+            as={Fragment}
+            enter="transform ease-out duration-300 transition"
+            enterFrom="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+            enterTo="translate-y-0 opacity-100 sm:translate-x-0"
+            leave="transition ease-in duration-100"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+              <div className="p-4">
+                <div className="flex items-start">
+                  {showError ? (
+                    <>
+                      <div className="flex-shrink-0">
+                        <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+                      </div>
+                      <div className="ml-3 w-0 flex-1 pt-0.5">
+                        <p className="text-sm font-medium text-gray-900">An error occurred</p>
+                        <p className="mt-1 text-sm text-gray-500">There has been an error deleting the post, please try again.</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex-shrink-0">
+                        <CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />
+                      </div>
+                      <div className="ml-3 w-0 flex-1 pt-0.5">
+                        <p className="text-sm font-medium text-gray-900">Blog deleted</p>
+                        <p className="mt-1 text-sm text-gray-500">This blog has been successfully deleted.</p>
+                      </div>
+                    </>
+                  )}
+                  <div className="ml-4 flex flex-shrink-0">
+                    <button
+                      type="button"
+                      className="inline-flex rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      onClick={() => {
+                        setShowDeleteNotification(false)
+                      }}
+                    >
+                      <span className="sr-only">Close</span>
+                      <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Transition>
+        </div>
       </div>
     </>
   )
