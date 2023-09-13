@@ -58,6 +58,7 @@ const BlogPosts = () => {
 
   const openToUpdateCate = (index, name) => {
     setOpenUpdateCate(true);
+    setDefaultCate(name);
     setRowNum(index);
     setRowName(name);
   }
@@ -66,6 +67,13 @@ const BlogPosts = () => {
     setOpenDeleteCate(true);
     setRowNum(index);
     setRowName(name);
+  }
+
+  const closeUpdateCate = () => {
+    setOpenUpdateCate(false);
+    setTimeout(() => {
+      setDefaultCate('')
+    }, 500)
   }
 
   const addBlogCate = (data) => {
@@ -257,7 +265,7 @@ const BlogPosts = () => {
                             {d.title}
                           </td>
                           <td className="relative whitespace-nowrap py-4 flex gap-x-3 justify-end pr-4">
-                            <button className='btn secondary-btn' onClick={() => {openToUpdateCate(index, d.title);setDefaultCate(d.title)}}>Edit</button>
+                            <button className='btn secondary-btn' onClick={() => {openToUpdateCate(index, d.title)}}>Edit</button>
                             <button className='btn primary-btn error' onClick={() => openToDeleteCate(index, d.title)}>Delete</button>
                           </td>
                         </tr>
@@ -396,7 +404,7 @@ const BlogPosts = () => {
       {/* Create modal when updating a category */}
 
       <Transition.Root show={openUpdateCate} as={Fragment}>
-        <Dialog as="div" className="relative z-[999]" initialFocus={cancelButtonRef} onClose={setOpenUpdateCate}>
+        <Dialog as="div" className="relative z-[999]" initialFocus={cancelButtonRef} onClose={closeUpdateCate}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -446,7 +454,7 @@ const BlogPosts = () => {
                     <div className="bg-gray-50 py-4 flex px-6 justify-end gap-x-3">
                       <button
                         className="btn white-outline-btn"
-                        onClick={(e) => {e.preventDefault();setOpenUpdateCate(false)}}
+                        onClick={(e) => {e.preventDefault();closeUpdateCate()}}
                         ref={cancelButtonRef}
                       >
                         Cancel
