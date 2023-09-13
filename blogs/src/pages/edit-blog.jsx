@@ -6,6 +6,8 @@ import { useFrappeCreateDoc, useFrappeGetDoc, useFrappeGetDocList, useFrappeUpda
 import { Fragment, useEffect, useState } from "react";
 import { useForm } from 'react-hook-form'
 import LoadingCircle from "../components/loading";
+import { useRef } from "react";
+import { useCallback } from "react";
 
 const EditBlog = () => {
   const { id } = useParams();
@@ -22,30 +24,36 @@ const EditBlog = () => {
     fields: ['name', 'full_name']
   })
 
-  const { register, handleSubmit, formState: {errors} } = useForm()
+  const { register, handleSubmit, watch, formState: {errors} } = useForm()
 
   const { updateDoc, loading } = useFrappeUpdateDoc()
 
   const [showSavePost, setShowSavePost] = useState(false);
   const [showError, setShowError] = useState(false);
 
+  const [title, setTitle] = useState(data && data.title)
+  const [date, setDate] = useState(data && data.published_on)
+
   const updatePost = (data) => {
-    updateDoc('Blog Post', id, data)
-    .then(() => {
-      setShowSavePost(true);
-      setShowError(false)
-    }).catch(() => {
-      setShowSavePost(true);
-      setShowError(true)
-      setTimeout(() => {
-        setShowSavePost(false)
-      }, 10000)
-    })
+    console.log(watch(data))
+    // updateDoc('Blog Post', id, data)
+    // .then(() => {
+    //   setShowSavePost(true);
+    //   setShowError(false)
+    // }).catch(() => {
+    //   setShowSavePost(true);
+    //   setShowError(true)
+    //   setTimeout(() => {
+    //     setShowSavePost(false)
+    //   }, 10000)
+    // })
   }
 
   useEffect(() => {
     if (typeof id !== undefined || typeof id !== null){
-      mutate(id)
+      setTimeout(() => {
+        mutate(id);
+      }, 1)
     }
   }, [id])
 
@@ -87,7 +95,6 @@ const EditBlog = () => {
                 <button
                   type='submit'
                   className="btn primary-btn"
-                  {...register('published')}
                 >
                   {loading ? 'Publishing...' : 'Publish'}
                 </button>
@@ -103,13 +110,13 @@ const EditBlog = () => {
             <div className="grid grid-cols-2 gap-x-4">
               <div>
                 <label htmlFor='title' className="subheading">Title</label>
-                <input type='text' id='title' name='title' value={data.title} className="form-input" {...register('title')} />
+                <input type='text' id='title' name='title' defaultValue={data.title} className="form-input" {...register('title')} />
               </div>
 
               <div>
                 <label htmlFor='cate-title' className="subheading">Category</label>
                 {dataCate && (
-                  <select className="form-input" id='cate-title' name='blog_category' {...register('blog_category')} value={dataCate.name}>
+                  <select className="form-input" id='cate-title' name='blog_category' {...register('blog_category')} defaultValue={dataCate.name}>
                     {dataCate.map((d) => 
                       <option value={d.name}>{d.title}</option>
                     )}
@@ -118,21 +125,21 @@ const EditBlog = () => {
               </div>
             </div>
 
-            <div className="mt-4">
+            {/* <div className="mt-4">
               <label htmlFor='content' className="subheading">Content</label>
-              <textarea id='content' name='content' className="form-input" value={data.content} style={{height:"200px"}} {...register('content')} />
-            </div>
+              <textarea id='content' name='content' className="form-input" defaultValue={data.content} style={{height:"200px"}} {...register('content')} />
+            </div> */}
 
             <div className="grid grid-cols-2 gap-x-4 mt-4">
               <div>
                 <label htmlFor='published_on' className="subheading">Published on</label>
-                <input type='date' id='published_on' name='published_on' value={data.published_on} className="form-input" {...register('published_on')} />
+                <input type='date' id='published_on' name='published_on' defaultValue={data.published_on} className="form-input" {...register('published_on')} />
               </div>
 
               <div>
                 <label htmlFor='blogger' className="subheading">Blogger</label>
                 {dataBlogger && (
-                  <select className="form-input" id='blogger' name='blogger' {...register('blogger')} value={dataBlogger.name}>
+                  <select className="form-input" id='blogger' name='blogger' {...register('blogger')} defaultValue={dataBlogger.name}>
                     {dataBlogger.map((d) => 
                       <option value={d.name}>{d.name}</option>
                     )}

@@ -73,6 +73,7 @@ const AddBlog = () => {
             <h1 className="main-title">Add Post</h1>
             <div className="flex gap-x-4">
               <button
+                {...register('published', 1)}
                 className="btn primary-btn"
               >
                 {loading ? 'Publishing...' : 'Publish'}
@@ -104,10 +105,10 @@ const AddBlog = () => {
             </div>
           </div>
 
-          <div className="mt-4">
+          {/* <div className="mt-4">
             <label htmlFor='content' className="subheading">Content</label>
             <textarea id='content' name='content' className="form-input" style={{height:"200px"}} {...register('content')}/>
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-2 gap-x-4 mt-4">
             <div>

@@ -10,7 +10,7 @@ import { useForm } from 'react-hook-form';
 
 const BlogPosts = () => {
   const [currentPage, setCurrentPage] = useState(0)
-  const [limitData, setLimitData] = useState(5)
+  const [limitData, setLimitData] = useState(3)
 
   const [showError, setShowError] = useState(false)
 
