@@ -31,8 +31,8 @@ const EditBlog = () => {
   const [showSavePost, setShowSavePost] = useState(false);
   const [showError, setShowError] = useState(false);
 
-  const [title, setTitle] = useState(data && data.title)
-  const [date, setDate] = useState(data && data.published_on)
+  const [title, setTitle] = useState('')
+  const [date, setDate] = useState('')
 
   const updatePost = (data) => {
     updateDoc('Blog Post', id, data)
@@ -49,10 +49,12 @@ const EditBlog = () => {
   }
 
   useEffect(() => {
-    if (id){
+    if (data){
       mutate();
+      setTitle(data.title);
+      setDate(data.published_on);
     }
-  }, [])
+  })
 
   return (
     <>
@@ -108,7 +110,7 @@ const EditBlog = () => {
             <div className="grid grid-cols-2 gap-x-4">
               <div>
                 <label htmlFor='title' className="subheading">Title</label>
-                <input type='text' id='title' name='title' defaultValue={data.title} className="form-input" {...register('title')} />
+                <input type='text' id='title' name='title' defaultValue={title} className="form-input" {...register('title')} />
               </div>
 
               <div>
@@ -131,7 +133,7 @@ const EditBlog = () => {
             <div className="grid grid-cols-2 gap-x-4 mt-4">
               <div>
                 <label htmlFor='published_on' className="subheading">Published on</label>
-                <input type='date' id='published_on' name='published_on' defaultValue={data.published_on} className="form-input" {...register('published_on')} />
+                <input type='date' id='published_on' name='published_on' defaultValue={date} className="form-input" {...register('published_on')} />
               </div>
 
               <div>
