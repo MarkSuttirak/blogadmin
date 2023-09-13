@@ -154,6 +154,27 @@ const BlogPosts = () => {
     setIndeterminate(false)
   }
 
+  const PaginationNum = () => {
+    if (allCate){
+      const allCates = Math.ceil(allCate.length / limitCate);
+      let num = 0;
+      let pages = []
+
+      while (num < allCates){
+        pages.push(
+          <button onClick={(index) => setCurrentPage(index)}
+            className={`relative inline-flex items-center border bg-white px-4 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20 ${currentPage == num ? 'border-[#0099FF] z-10' : 'border-gray-300'}`}
+          >
+            {num + 1}
+          </button>
+        )
+        num++
+      }
+
+      return pages;
+    }
+  }
+
   return (
     <>
       <div className='page-section'>
@@ -257,14 +278,17 @@ const BlogPosts = () => {
                   <nav className="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
                     <button
                       onClick={goPrevPage}
-                      className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20"
+                      className="relative inline-flex items-center rounded-l-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50"
                     >
                       <span className="sr-only">Previous</span>
                       <ChevronLeftIcon className="h-5 w-5" aria-hidden="true" />
                     </button>
+
+                    <PaginationNum />
+
                     <button
                       onClick={goNextPage}
-                      className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-20"
+                      className="relative inline-flex items-center rounded-r-md border border-gray-300 bg-white px-2 py-2 text-sm font-medium text-gray-500 hover:bg-gray-50"
                     >
                       <span className="sr-only">Next</span>
                       <ChevronRightIcon className="h-5 w-5" aria-hidden="true" />
