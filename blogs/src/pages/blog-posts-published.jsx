@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import { HomeSmile } from '@untitled-ui/icons-react/build/cjs';
 import { useForm } from 'react-hook-form';
 
-const BlogPostsDraft = () => {
+const BlogPostsPublished = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const [limitData, setLimitData] = useState(5)
 
@@ -16,13 +16,13 @@ const BlogPostsDraft = () => {
 
   const { data, isLoading, error, mutate } = useFrappeGetDocList('Blog Post', {
     fields: ['name','title','blog_category','published_on','published'],
-    filters: [['published', '=', '0']],
+    filters: [['published', '=', '1']],
     limit_start: limitData * currentPage,
     limit: limitData
   })
 
   const { data:allData, mutate:mutateAll } = useFrappeGetDocList('Blog Post', {
-    filters: [['published', '=', '0']],
+    filters: [['published', '=', '1']],
   })
 
   const goPrevPage = () => {
@@ -135,14 +135,14 @@ const BlogPostsDraft = () => {
               <div className="flex items-center">
                 <ChevronRightIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
                 <p className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
-                  Draft Blog Posts
+                  Published Blog Posts
                 </p>
               </div>
             </li>
           </ol>
         </nav>
         <div className="flex items-center justify-between mb-8">
-          <h1 className="main-title">Draft Blog Posts</h1>
+          <h1 className="main-title">Published Blog Posts</h1>
           <Link to='/blog-posts/add'
             className="btn primary-btn"
           >
@@ -392,4 +392,4 @@ const BlogPostsDraft = () => {
   )
 }
 
-export default BlogPostsDraft;
+export default BlogPostsPublished;

@@ -32,7 +32,10 @@ const Sidebar = ({ loadingLogo, tooltip }) => {
 
   const { data: dataBlog } = useFrappeGetDocList('Blog Post')
   const { data: dataBlogDraft } = useFrappeGetDocList('Blog Post', {
-    filters: [['published','=','false']]
+    filters: [['published','=','0']]
+  })
+  const { data: dataBlogPublished } = useFrappeGetDocList('Blog Post', {
+    filters: [['published','=','1']]
   })
   const { data: dataBlogCate } = useFrappeGetDocList('Blog Category')
 
@@ -42,8 +45,9 @@ const Sidebar = ({ loadingLogo, tooltip }) => {
   ]
 
   const secondNavigation = [
-    { name: 'Posts', icon: <Edit04 viewBox='0 0 30 24' width='24' className='menu-icon'/>, href: '/blog-posts', count: [dataBlog && dataBlog.length, 'blue', 'have-dot'], current: active === '/' || active === '/blog-posts' ? true : false, id: 'blog-posts' },
+    { name: 'All Posts', icon: <Edit04 viewBox='0 0 30 24' width='24' className='menu-icon'/>, href: '/blog-posts', count: [dataBlog && dataBlog.length, 'blue', 'have-dot'], current: active === '/' || active === '/blog-posts' ? true : false, id: 'blog-posts' },
     { name: 'Draft', icon: <Inbox01 viewBox='0 0 30 24' width='24' className='menu-icon'/>, href: '/blog-posts/draft', count: [dataBlogDraft && dataBlogDraft.length, 'blue', 'have-dot'], current: active === '/blog-posts/draft' ? true : false, id: 'blog-posts-draft' },
+    { name: 'Published', icon: <Inbox01 viewBox='0 0 30 24' width='24' className='menu-icon'/>, href: '/blog-posts/published', count: [dataBlogPublished && dataBlogPublished.length, 'blue', 'have-dot'], current: active === '/blog-posts/published' ? true : false, id: 'blog-posts-published' },
     { name: 'Scheduled', icon: <Inbox01 viewBox='0 0 30 24' width='24'className='menu-icon'/>, href: '/blog-posts/scheduled', current: active === '/blog-posts/scheduled' ? true : false, id: 'blog-posts-scheduled' },
   ]
 

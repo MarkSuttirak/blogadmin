@@ -8,17 +8,17 @@ import { useForm } from 'react-hook-form'
 import { Link } from 'react-router-dom';
 import { HomeSmile } from '@untitled-ui/icons-react/build/cjs';
 
-const BlogCategories = () => {
+const Tags = () => {
   const [currentPage, setCurrentPage] = useState(0)
   const [limitCate, setLimitCate] = useState(5)
 
-  const { data, isLoading, error, mutate } = useFrappeGetDocList('Blog Category', {
-    fields: ['name','title'],
+  const { data, isLoading, error, mutate } = useFrappeGetDocList('Tag', {
+    fields: ['name'],
     limit_start: limitCate * currentPage,
     limit: limitCate
   })
 
-  const { data:allCate } = useFrappeGetDocList('Blog Category')
+  const { data:allCate } = useFrappeGetDocList('Tag')
 
   const [defaultCate, setDefaultCate] = useState('');
 
@@ -77,7 +77,7 @@ const BlogCategories = () => {
   }
 
   const addBlogCate = (data) => {
-    createDoc('Blog Category', data)
+    createDoc('Tag', data)
     .then(() => {
       mutate()
       setOpenAddCate(false);
@@ -98,7 +98,7 @@ const BlogCategories = () => {
   }
 
   const updateBlogCate = (info) => {
-    updateDoc('Blog Category', data[rowNum].name, info)
+    updateDoc('Tag', data[rowNum].name, info)
     .then(() => {
       mutate()
       setOpenUpdateCate(false);
@@ -119,7 +119,7 @@ const BlogCategories = () => {
   }
 
   const deleteBlogCate = (info) => {
-    deleteDoc('Blog Category', data[rowNum].name, info)
+    deleteDoc('Tag', data[rowNum].name, info)
     .then(() => {
       mutate()
       setOpenDeleteCate(false);
@@ -139,9 +139,9 @@ const BlogCategories = () => {
     })
   }
 
-  useFrappeDocTypeEventListener('Blog Category', (d) => {
+  useFrappeDocTypeEventListener('Tag', (d) => {
     console.log(d)
-    if (d.doctype === 'Blog Category'){
+    if (d.doctype === 'Tag'){
       mutate()
     }
   })
@@ -203,19 +203,19 @@ const BlogCategories = () => {
               <div className="flex items-center">
                 <ChevronRightIcon className="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
                 <p className="ml-4 text-sm font-medium text-gray-500 hover:text-gray-700">
-                  Blog Categories
+                  Tags
                 </p>
               </div>
             </li>
           </ol>
         </nav>
         <div className="flex items-center justify-between mb-8">
-          <h1 className="main-title">Blog Categories</h1>
+          <h1 className="main-title">Tags</h1>
           <button
             className="btn primary-btn"
             onClick={() => setOpenAddCate(true)}
           >
-            Add Category
+            Add Tag
           </button>
         </div>
         {data && (
@@ -262,11 +262,11 @@ const BlogCategories = () => {
                             />
                           </td>
                           <td className="table-title w-[50%]">
-                            {d.title}
+                            {d.name}
                           </td>
                           <td className="relative whitespace-nowrap py-4 flex gap-x-3 justify-end pr-4">
-                            <button className='btn secondary-btn' onClick={() => {openToUpdateCate(index, d.title)}}>Edit</button>
-                            <button className='btn primary-btn error' onClick={() => openToDeleteCate(index, d.title)}>Delete</button>
+                            <button className='btn secondary-btn' onClick={() => {openToUpdateCate(index, d.name)}}>Edit</button>
+                            <button className='btn primary-btn error' onClick={() => openToDeleteCate(index, d.name)}>Delete</button>
                           </td>
                         </tr>
                       ))}
@@ -361,7 +361,7 @@ const BlogCategories = () => {
                     <div className="bg-white p-6">
                       <div className="text-left">
                         <label htmlFor='add-cate' className="main-heading">
-                          Add Blog Category
+                          Add Tag
                         </label>
                         <div className="mt-4">
                           <input
@@ -369,7 +369,7 @@ const BlogCategories = () => {
                             name="add-cate"
                             id="add-cate"
                             className="form-input"
-                            placeholder='Enter the category name'
+                            placeholder='Enter the tag name'
                             {...register('title', {
                               required: 'This field is required.',
                             })}
@@ -433,7 +433,7 @@ const BlogCategories = () => {
                     <div className="bg-white p-6">
                       <div className="text-left">
                         <label htmlFor='edit-cate' className="main-heading">
-                          Edit Blog Category: {rowName}
+                          Edit Tag: {rowName}
                         </label>
                         <div className="mt-4">
                           <input
@@ -441,7 +441,7 @@ const BlogCategories = () => {
                             name="edit-cate"
                             id="edit-cate"
                             className="form-input"
-                            placeholder='Enter the category name'
+                            placeholder='Enter the tag name'
                             defaultValue={defaultCate}
                             {...register('title', {
                               required: 'This field is required.',
@@ -505,10 +505,10 @@ const BlogCategories = () => {
                     <div className="bg-white p-6">
                       <div className="text-left">
                         <label htmlFor='add-cate' className="main-heading">
-                          Delete Blog Category: {rowName}
+                          Delete Tag: {rowName}
                         </label>
                         <div className="mt-4">
-                          <p>Are you sure to delete this blog category? This action cannot be undone.</p>
+                          <p>Are you sure to delete this tag? This action cannot be undone.</p>
                         </div>
                       </div>
                     </div>
@@ -563,7 +563,7 @@ const BlogCategories = () => {
                       </div>
                       <div className="ml-3 w-0 flex-1 pt-0.5">
                         <p className="text-sm font-medium text-gray-900">An error occurred</p>
-                        <p className="mt-1 text-sm text-gray-500">There has been an error adding the category, please try again.</p>
+                        <p className="mt-1 text-sm text-gray-500">There has been an error adding the tag, please try again.</p>
                       </div>
                     </>
                   ) : (
@@ -572,8 +572,8 @@ const BlogCategories = () => {
                         <CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />
                       </div>
                       <div className="ml-3 w-0 flex-1 pt-0.5">
-                        <p className="text-sm font-medium text-gray-900">Blog category added</p>
-                        <p className="mt-1 text-sm text-gray-500">A blog category has been successfully added.</p>
+                        <p className="text-sm font-medium text-gray-900">Tag added</p>
+                        <p className="mt-1 text-sm text-gray-500">A tag has been successfully added.</p>
                       </div>
                     </>
                   )}
@@ -623,7 +623,7 @@ const BlogCategories = () => {
                       </div>
                       <div className="ml-3 w-0 flex-1 pt-0.5">
                         <p className="text-sm font-medium text-gray-900">An error occurred</p>
-                        <p className="mt-1 text-sm text-gray-500">There has been an error updating the category, please try again.</p>
+                        <p className="mt-1 text-sm text-gray-500">There has been an error updating the tag, please try again.</p>
                       </div>
                     </>
                   ) : (
@@ -632,8 +632,8 @@ const BlogCategories = () => {
                         <CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />
                       </div>
                       <div className="ml-3 w-0 flex-1 pt-0.5">
-                        <p className="text-sm font-medium text-gray-900">Blog category updated</p>
-                        <p className="mt-1 text-sm text-gray-500">This blog category has been successfully updated.</p>
+                        <p className="text-sm font-medium text-gray-900">Tag updated</p>
+                        <p className="mt-1 text-sm text-gray-500">This tag has been successfully updated.</p>
                       </div>
                     </>
                   )}
@@ -683,7 +683,7 @@ const BlogCategories = () => {
                       </div>
                       <div className="ml-3 w-0 flex-1 pt-0.5">
                         <p className="text-sm font-medium text-gray-900">An error occurred</p>
-                        <p className="mt-1 text-sm text-gray-500">There has been an error deleting the category, please try again.</p>
+                        <p className="mt-1 text-sm text-gray-500">There has been an error deleting the tag, please try again.</p>
                       </div>
                     </>
                   ) : (
@@ -692,8 +692,8 @@ const BlogCategories = () => {
                         <CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />
                       </div>
                       <div className="ml-3 w-0 flex-1 pt-0.5">
-                        <p className="text-sm font-medium text-gray-900">Blog category deleted</p>
-                        <p className="mt-1 text-sm text-gray-500">This blog category has been successfully deleted.</p>
+                        <p className="text-sm font-medium text-gray-900">Tag deleted</p>
+                        <p className="mt-1 text-sm text-gray-500">This tag has been successfully deleted.</p>
                       </div>
                     </>
                   )}
@@ -719,4 +719,4 @@ const BlogCategories = () => {
   )
 }
 
-export default BlogCategories;
+export default Tags;
