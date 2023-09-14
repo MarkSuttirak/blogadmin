@@ -86,6 +86,10 @@ const EditBlog = () => {
   const [tagLists, setTagLists] = useState([]);
   const [tagName, setTagName] = useState('');
 
+  const createTag = (info) => {
+    createDoc('Tag', info);
+  }
+
   return (
     <>
       <div className='page-section'>
@@ -185,23 +189,22 @@ const EditBlog = () => {
                 <label htmlFor='tag' className="subheading">Tag</label>
                 <div className="form-input-tag">
                   <ul className="inline-flex gap-2 flex-wrap" id='tag-lists'>
-                    {tagLists.map((list) => 
+                    {tagLists.map((list, index) => 
                       <li key={list} className="bg-[#d1d5db] text-[#475467] px-2 inline-block rounded-lg flex items-center gap-x-1">
                         {list}
                 
-                        <XMarkIcon width='20'/>
+                        <XMarkIcon width='20' onClick={() => tagLists.splice(index, 1)}/>
                       </li>
                     )}
                   </ul>
                   <input type='text' id='title' name='tag' value={tagName} className="outline-none w-full" {...register('_user_tag')} onChange={(e) => setTagName(e.target.value)} onKeyDown={(e) => {
                     if (e.key == "Enter"){
-                      const newList = tagLists.concat(tagName);
-                      setTagLists(newList);
+                      setTagLists(tagLists.concat(tagName));
                       setTagName('');
+                      createTag(e.target.value);
                     }
                     if (e.key == "Backspace" && e.target.value.length == 0){
                       tagLists.pop();
-                      setTagLists(tagLists)
                     }
                   }}/>
                 </div>
