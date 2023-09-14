@@ -194,13 +194,13 @@ const EditBlog = () => {
                     )}
                   </ul>
                   <input type='text' id='title' name='tag' value={tagName} className="outline-none w-full" {...register('_user_tag')} onChange={(e) => setTagName(e.target.value)} onKeyDown={(e) => {
-                    if (e.key === "Enter"){
+                    if (e.key == "Enter"){
                       const newList = tagLists.concat(tagName);
                       setTagLists(newList);
                       setTagName('');
                     }
-                    if (e.key === "Backspace"){
-                      tagLists.pop()
+                    if (e.key == "Backspace" && e.target.value.length == 0){
+                      tagLists.pop();
                       setTagLists(tagLists)
                     }
                   }}/>
