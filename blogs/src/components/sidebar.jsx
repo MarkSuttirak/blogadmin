@@ -38,6 +38,7 @@ const Sidebar = ({ loadingLogo, tooltip }) => {
     filters: [['published','=','1']]
   })
   const { data: dataBlogCate } = useFrappeGetDocList('Blog Category')
+  const { data: dataTag } = useFrappeGetDocList('Tag')
 
   const firstNavigation = [
     { name: 'Dashboard', icon: <HomeSmile viewBox='0 0 30 24' width='24' className='menu-icon'/>, href: '', current: active === '/' ? true : false, id: 'dashboard' },
@@ -52,8 +53,8 @@ const Sidebar = ({ loadingLogo, tooltip }) => {
   ]
 
   const thirdNavigation = [
-    { name: 'Categories', icon: <Inbox01 viewBox='0 0 30 24' width='24'className='menu-icon'/>, href: '/blog-categories', count: [dataBlogCate && dataBlogCate.length, 'orange', 'have-dot'], current: active === '/blog-categories' ? true : false, id: 'blog-categories' },
-    { name: 'Tags', icon: <Tag03 viewBox='0 0 30 24' width='24' className='menu-icon'/>, href: '/tags', current: active === '/tags' ? true : false, id: 'tags' },
+    { name: 'Categories', icon: <Inbox01 viewBox='0 0 30 24' width='24' className='menu-icon'/>, href: '/blog-categories', count: [dataBlogCate && dataBlogCate.length, 'orange', 'have-dot'], current: active === '/blog-categories' ? true : false, id: 'blog-categories' },
+    { name: 'Tags', icon: <Tag03 viewBox='0 0 30 24' width='24' className='menu-icon'/>, href: '/tags', count: [dataTag && dataTag.length, 'orange', 'have-dot'], current: active === '/tags' ? true : false, id: 'tags' },
     { name: 'Settings', icon: <Settings04 viewBox='0 0 30 24' width='24' className='menu-icon'/>, href: '/settings', current: active === '/settings' ? true : false, id: 'settings' },
   ]
 

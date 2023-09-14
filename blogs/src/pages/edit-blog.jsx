@@ -13,7 +13,7 @@ const EditBlog = () => {
   const { id } = useParams();
 
   const { data, isLoading, error, mutate } = useFrappeGetDoc('Blog Post', id, {
-    fields: ['name', 'title', 'content', 'blog_category', 'published_on', 'blogger', 'published']
+    fields: ['name', 'title', 'content', 'blog_category', 'published_on', 'blogger', 'published','_user_tags']
   })
 
   const { data:dataCate } = useFrappeGetDocList('Blog Category', {
@@ -27,6 +27,7 @@ const EditBlog = () => {
   const { register, handleSubmit, watch, formState: {errors} } = useForm()
 
   const { updateDoc, loading } = useFrappeUpdateDoc()
+  const { createDoc } = useFrappeCreateDoc();
   const { updateDoc:updatePublish, loading:loadingPublish } = useFrappeUpdateDoc()
 
   const [showSavePost, setShowSavePost] = useState(false);
@@ -49,6 +50,27 @@ const EditBlog = () => {
     })
   }
 
+  const addBlogCate = (data) => {
+    createCate('Blog Category', data)
+    .then(() => {
+      mutate()
+      setOpenAddCate(false);
+      setShowAddNotification(true);
+      setShowError(false);
+      setTimeout(() => {
+        setShowAddNotification(false)
+      }, 10000)
+    })
+    .catch(() => {
+      setOpenAddCate(false);
+      setShowAddNotification(true);
+      setShowError(true);
+      setTimeout(() => {
+        setShowAddNotification(false)
+      }, 10000)
+    })
+  }
+
   const publishPost = (data) => {
     updatePublish('Blog Post', id, data)
   }
@@ -60,6 +82,9 @@ const EditBlog = () => {
       setDate(data.published_on);
     }
   })
+
+  const [tagLists, setTagLists] = useState([]);
+  const [tagName, setTagName] = useState('');
 
   return (
     <>
@@ -92,67 +117,97 @@ const EditBlog = () => {
           </ol>
         </nav>
         {data && (
-          <form onSubmit={handleSubmit(updatePost)}>
-            <div className="flex items-center justify-between mb-8">
-              <h1 className="main-title">Edit Post: {data.title}</h1>
-              <div className="flex gap-x-4">
-                <button
-                  type='submit'
-                  className="btn primary-btn"
-                  {...register('published')}
-                >
-                  {loadingPublish ? 'Publishing...' : 'Publish'}
-                </button>
-                <button
-                  type='submit'
-                  className="btn primary-btn"
-                >
-                  {loading ? 'Saving...' : 'Save'}
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-x-4">
-              <div>
-                <label htmlFor='title' className="subheading">Title</label>
-                <input type='text' id='title' name='title' defaultValue={title} className="form-input" {...register('title')} />
+          <>
+            <form onSubmit={handleSubmit(updatePost)}>
+              <div className="flex items-center justify-between mb-8">
+                <h1 className="main-title">Edit Post: {data.title}</h1>
+                <div className="flex gap-x-4">
+                  <button
+                    type='submit'
+                    className="btn primary-btn"
+                    {...register('published')}
+                  >
+                    {loadingPublish ? 'Publishing...' : 'Publish'}
+                  </button>
+                  <button
+                    type='submit'
+                    className="btn primary-btn"
+                  >
+                    {loading ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
               </div>
 
-              <div>
-                <label htmlFor='cate-title' className="subheading">Category</label>
-                {dataCate && (
-                  <select className="form-input" id='cate-title' name='blog_category' {...register('blog_category')} defaultValue={dataCate.name}>
-                    {dataCate.map((d) => 
-                      <option value={d.name}>{d.title}</option>
-                    )}
-                  </select>
-                )}
-              </div>
-            </div>
+              <div className="grid grid-cols-2 gap-x-4">
+                <div>
+                  <label htmlFor='title' className="subheading">Title</label>
+                  <input type='text' id='title' name='title' defaultValue={title} className="form-input" {...register('title')} />
+                </div>
 
-            {/* <div className="mt-4">
-              <label htmlFor='content' className="subheading">Content</label>
-              <textarea id='content' name='content' className="form-input" defaultValue={data.content} style={{height:"200px"}} {...register('content')} />
-            </div> */}
+                <div>
+                  <label htmlFor='cate-title' className="subheading">Category</label>
+                  {dataCate && (
+                    <select value={dataCate.name} className="form-input" id='cate-title' name='blog_category' {...register('blog_category')}>
+                      {dataCate.map((d) => 
+                        <option key={d.name} value={d.name}>{d.title}</option>
+                      )}
+                    </select>
+                  )}
+                </div>
+              </div>
+
+              {/* <div className="mt-4">
+                <label htmlFor='content' className="subheading">Content</label>
+                <textarea id='content' name='content' className="form-input" defaultValue={data.content} style={{height:"200px"}} {...register('content')} />
+              </div> */}
+
+              <div className="grid grid-cols-2 gap-x-4 mt-4">
+                <div>
+                  <label htmlFor='published_on' className="subheading">Published on</label>
+                  <input type='date' id='published_on' name='published_on' defaultValue={date} className="form-input" {...register('published_on')} />
+                </div>
+
+                <div>
+                  <label htmlFor='blogger' className="subheading">Blogger</label>
+                  {dataBlogger && (
+                    <select className="form-input" id='blogger' name='blogger' {...register('blogger')} defaultValue={dataBlogger.name}>
+                      {dataBlogger.map((d) => 
+                        <option value={d.name}>{d.name}</option>
+                      )}
+                    </select>
+                  )}
+                </div>
+              </div>
+            </form>
 
             <div className="grid grid-cols-2 gap-x-4 mt-4">
               <div>
-                <label htmlFor='published_on' className="subheading">Published on</label>
-                <input type='date' id='published_on' name='published_on' defaultValue={date} className="form-input" {...register('published_on')} />
-              </div>
-
-              <div>
-                <label htmlFor='blogger' className="subheading">Blogger</label>
-                {dataBlogger && (
-                  <select className="form-input" id='blogger' name='blogger' {...register('blogger')} defaultValue={dataBlogger.name}>
-                    {dataBlogger.map((d) => 
-                      <option value={d.name}>{d.name}</option>
+                <label htmlFor='tag' className="subheading">Tag</label>
+                <div className="form-input-tag">
+                  <ul className="inline-flex gap-2 flex-wrap" id='tag-lists'>
+                    {tagLists.map((list) => 
+                      <li key={list} className="bg-[#d1d5db] text-[#475467] px-2 inline-block rounded-lg flex items-center gap-x-1">
+                        {list}
+                
+                        <XMarkIcon width='20'/>
+                      </li>
                     )}
-                  </select>
-                )}
+                  </ul>
+                  <input type='text' id='title' name='tag' value={tagName} className="outline-none w-full" {...register('_user_tag')} onChange={(e) => setTagName(e.target.value)} onKeyDown={(e) => {
+                    if (e.key === "Enter"){
+                      const newList = tagLists.concat(tagName);
+                      setTagLists(newList);
+                      setTagName('');
+                    }
+                    if (e.key === "Backspace"){
+                      tagLists.pop()
+                      setTagLists(tagLists)
+                    }
+                  }}/>
+                </div>
               </div>
             </div>
-          </form>
+          </>
         )}
 
         {isLoading && (

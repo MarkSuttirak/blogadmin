@@ -223,6 +223,17 @@ $mobile-footer-size: 60px;
   }
 }
 
+.form-input-tag {
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  padding:8px 12px;
+  font-size:14px;
+  font-weight:400;
+  color:#475467;
+  background-color:white;
+  width:100%;
+}
+
 #loading-icon{
   border-radius:50%;
   background:linear-gradient(0deg, $primary, #FFFFFF);
