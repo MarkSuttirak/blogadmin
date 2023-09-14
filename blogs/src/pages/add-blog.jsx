@@ -232,7 +232,7 @@ const MenuBar = () => {
 
   const createPost = (data) => {
 
-    data.content = postcontent;
+    data.content_html = postcontent;
 
     createDoc('Blog Post', data)
     .then(() => {
