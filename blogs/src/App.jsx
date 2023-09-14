@@ -13,6 +13,8 @@ import ViewPost from './pages/view-post'
 import Sidebar from './components/sidebar'
 import { createContext } from 'react'
 
+
+
 export const switchContext = createContext();
 
 function App() {
