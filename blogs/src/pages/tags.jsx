@@ -370,11 +370,11 @@ const Tags = () => {
                             id="add-cate"
                             className="form-input"
                             placeholder='Enter the tag name'
-                            {...register('title', {
+                            {...register('name', {
                               required: 'This field is required.',
                             })}
                           />
-                          <p className='mt-2 text-xs '>{errors.title?.message}</p>
+                          <p className='mt-2 text-xs '>{errors.name?.message}</p>
                         </div>
                       </div>
                     </div>
@@ -443,11 +443,11 @@ const Tags = () => {
                             className="form-input"
                             placeholder='Enter the tag name'
                             defaultValue={defaultCate}
-                            {...register('title', {
+                            {...register('name', {
                               required: 'This field is required.',
                             })}
                           />
-                          <p className='mt-2 text-xs '>{errors.title?.message}</p>
+                          <p className='mt-2 text-xs '>{errors.name?.message}</p>
                         </div>
                       </div>
                     </div>

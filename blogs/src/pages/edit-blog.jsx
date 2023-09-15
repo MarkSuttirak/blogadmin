@@ -16,6 +16,8 @@ const EditBlog = () => {
     fields: ['name', 'title', 'content', 'blog_category', 'published_on', 'blogger', 'published','_user_tags']
   })
 
+  // console.log(data)
+
   const { data:dataCate } = useFrappeGetDocList('Blog Category', {
     fields: ['name', 'title']
   })
@@ -88,6 +90,7 @@ const EditBlog = () => {
 
   const createTag = (info) => {
     createDoc('Tag', info);
+    // console.log(info)
   }
 
   return (
@@ -184,32 +187,34 @@ const EditBlog = () => {
               </div>
             </form>
 
-            <div className="grid grid-cols-2 gap-x-4 mt-4">
-              <div>
-                <label htmlFor='tag' className="subheading">Tag</label>
-                <div className="form-input-tag">
-                  <ul className="inline-flex gap-2 flex-wrap" id='tag-lists'>
-                    {tagLists.map((list, index) => 
-                      <li key={list} className="bg-[#d1d5db] text-[#475467] px-2 inline-block rounded-lg flex items-center gap-x-1">
-                        {list}
-                
-                        <XMarkIcon width='20' onClick={() => tagLists.splice(index, 1)}/>
-                      </li>
-                    )}
-                  </ul>
-                  <input type='text' id='title' name='tag' value={tagName} className="outline-none w-full" {...register('_user_tag')} onChange={(e) => setTagName(e.target.value)} onKeyDown={(e) => {
-                    if (e.key == "Enter"){
-                      setTagLists(tagLists.concat(tagName));
-                      setTagName('');
-                      createTag(e.target.value);
-                    }
-                    if (e.key == "Backspace" && e.target.value.length == 0){
-                      tagLists.pop();
-                    }
-                  }}/>
+            <form onSubmit={handleSubmit(createTag)}>
+              <div className="grid grid-cols-2 gap-x-4 mt-4">
+                <div>
+                  <label htmlFor='tag' className="subheading">Tag</label>
+                  <div className="form-input-tag">
+                    <ul className="inline-flex gap-2 flex-wrap" id='tag-lists'>
+                      {tagLists.map((list, index) => 
+                        <li key={list} className="bg-[#d1d5db] text-[#475467] px-2 inline-block rounded-lg flex items-center gap-x-1">
+                          {list}
+                  
+                          <XMarkIcon width='20' onClick={() => tagLists.splice(index, 1)}/>
+                        </li>
+                      )}
+                    </ul>
+                    <input type='text' id='title' name='tag' value={tagName} className="outline-none w-full" {...register('name')} onChange={(e) => setTagName(e.target.value)} onKeyDown={(e) => {
+                      if (e.key == "Enter"){
+                        setTagLists(tagLists.concat(tagName));
+                        setTagName('');
+                        createTag(e.target.value);
+                      }
+                      if (e.key == "Backspace" && e.target.value.length == 0){
+                        tagLists.pop();
+                      }
+                    }}/>
+                  </div>
                 </div>
               </div>
-            </div>
+            </form>
           </>
         )}
 
