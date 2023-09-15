@@ -97,12 +97,17 @@ const EditBlog = () => {
       mutate();
       setTitle(data.title);
       setDate(data.published_on);
+    }
+  })
+
+  useEffect(() => {
+    if (data){
       if (data.meta_image){
         setFileImg(data.meta_image);
         setUploaded(true)
       }
     }
-  })
+  }, [])
 
   const [tagLists, setTagLists] = useState([]);
   const [tagName, setTagName] = useState('');
