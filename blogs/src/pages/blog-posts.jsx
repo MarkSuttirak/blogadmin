@@ -166,7 +166,7 @@ const BlogPosts = () => {
                         <th scope="col" className="table-head-text">
                           Image
                         </th>
-                        <th scope="col" className="table-head-text w-[50%]">
+                        <th scope="col" className="table-head-text w-[40%]">
                           Title
                         </th>
                         <th scope="col" className="table-head-text">
@@ -201,10 +201,10 @@ const BlogPosts = () => {
                               }
                             />
                           </td>
-                          <td className="table-desc w-20 px-4">
-                            <img src={d.meta_image} className='rounded-full'/>
+                          <td className="table-desc min-w-[80px] w-[80px] pr-5">
+                            <img src={d.meta_image} className='rounded-lg'/>
                           </td>
-                          <td className="table-title w-[50%]">
+                          <td className="table-title w-[40%]">
                             {d.title}
                           </td>
                           <td className="table-desc">{d.blog_category}</td>

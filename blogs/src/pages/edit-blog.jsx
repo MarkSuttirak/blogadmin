@@ -19,18 +19,14 @@ const EditBlog = () => {
   const { upload, progress, loading:loadingUpload, error:errorUpload } = useFrappeFileUpload()
 
   const fileArgs = {
-    "file_url": "http://localhost:8080",
+    "isPrivate": false,
     "doctype": "Blog Post",
     "docname": id,
     "fieldname": "meta_image"
   }
 
   const [fileImg, setFileImg] = useState();
-  const [uploaded, setUploaded] = useState(false)
-
-  const uploadImage = () => {
-    upload(fileImg, fileArgs).then(() => console.log("Upload completed")).catch((e) => console.error(e))
-  }
+  const [uploaded, setUploaded] = useState()
 
   const { data:dataCate } = useFrappeGetDocList('Blog Category', {
     fields: ['name', 'title']
@@ -54,7 +50,10 @@ const EditBlog = () => {
   const [date, setDate] = useState('')
 
   const updatePost = (data) => {
-    updateDoc('Blog Post', id, data)
+    updateDoc('Blog Post', id, {
+      ...data,
+      meta_image: uploaded
+    })
     .then(() => {
       setShowSavePost(true);
       setShowError(false)
@@ -101,11 +100,9 @@ const EditBlog = () => {
   })
 
   useEffect(() => {
-    if (data){
-      if (data.meta_image){
-        setFileImg(data.meta_image);
-        setUploaded(true)
-      }
+    if (data && data.meta_image){
+      setFileImg(data.meta_image);
+      setUploaded(true)
     }
   }, [])
 
@@ -171,7 +168,23 @@ const EditBlog = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-x-4">
+              <div>
+                <label htmlFor='image' className="subheading inline-block cursor-pointer">
+                  Blog image
+                  <div className={`w-[180px] h-[120px]${!uploaded ? ' bg-[#737373] ' : ' '}rounded-lg overflow-hidden`}>
+                    {uploaded && <img src={fileImg} className="w-full h-full object-cover"/>}
+                    <input type='file' id='image' name='meta_image' className='hidden' accept='image/png, image/svg, image/jpg, image/jpeg' {...register('meta_image')} onChange={(e) => {
+                      setFileImg(URL.createObjectURL(e.target.files[0]))
+                      upload(e.target.files[0], fileArgs)
+                      .then((res) => setUploaded(res.file_url))
+                      .then(() => console.log("Upload completed"))
+                      .catch((e) => console.error(e))
+                    }} multiple="false"/>
+                  </div>
+                </label>
+              </div>
+
+              <div className="grid grid-cols-2 gap-x-4 mt-4">
                 <div>
                   <label htmlFor='title' className="subheading">Title</label>
                   <input type='text' id='title' name='title' defaultValue={title} className="form-input" {...register('title')} />
@@ -211,20 +224,6 @@ const EditBlog = () => {
                   )}
                 </div>
               </div>
-
-              <div className="mt-4">
-                <label htmlFor='image' className="subheading inline-block cursor-pointer">
-                  Upload image
-                  <div className={`w-20 h-20${!uploaded ? ' bg-[#737373] ' : ' '}rounded-full overflow-hidden`}>
-                    {uploaded && <img src={fileImg} className="w-full h-full object-cover"/>}
-                    <input type='file' id='image' name='meta_image' className='hidden' accept='image/png, image/svg, image/jpg, image/jpeg' {...register('meta_image')} onChange={(e) => {
-                      setFileImg(URL.createObjectURL(e.target.files[0]))
-                      setUploaded(true);
-                      uploadImage()
-                    }} multiple="false"/>
-                  </div>
-                </label>
-              </div>
             </form>
 
             <form onSubmit={handleSubmitTag(createTag)}>
@@ -248,7 +247,8 @@ const EditBlog = () => {
                         createTag(e.target.value);
                       }
                       if (e.key == "Backspace" && e.target.value.length == 0){
-                        tagLists.pop();
+                        const tagToRemove = tagLists.pop();
+                        setTagLists(tagLists.filter(tag => tag !== tagToRemove))
                       }
                     }}/>
                   </div>
