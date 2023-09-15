@@ -147,9 +147,12 @@ const EditBlog = () => {
               <div className="flex items-center justify-between mb-8">
                 <h1 className="main-title">Edit Post: {data.title}</h1>
                 <div className="flex gap-x-4">
+                  <button className="btn secondary-btn">
+                    Preview
+                  </button>
                   <button
                     type='submit'
-                    className="btn primary-btn"
+                    className="btn secondary-btn"
                     {...register('published')}
                   >
                     {loadingPublish ? 'Publishing...' : 'Publish'}

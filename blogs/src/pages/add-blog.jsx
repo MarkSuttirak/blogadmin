@@ -283,7 +283,7 @@ const MenuBar = () => {
             <div className="flex gap-x-4">
               <button
                 {...register('published')}
-                className="btn primary-btn"
+                className="btn secondary-btn"
               >
                 {loadingPublish ? 'Publishing...' : 'Publish'}
               </button>
