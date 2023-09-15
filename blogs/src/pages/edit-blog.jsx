@@ -115,8 +115,6 @@ const EditBlog = () => {
       const insertedTags = data._user_tags.split(',');
       const deductFirstTags = insertedTags.splice(1, insertedTags.length)
       setTagLists(tagLists.concat(deductFirstTags));
-  
-      console.log(tagLists)
     }
   }, [data])
 
@@ -249,14 +247,20 @@ const EditBlog = () => {
                         <li key={list} className="bg-[#d1d5db] text-[#475467] px-2 inline-block rounded-lg flex items-center gap-x-1">
                           {list}
                   
-                          <XMarkIcon width='20' className="cursor-pointer" onClick={() => tagLists.splice(index, 1)}/>
+                          <XMarkIcon width='20' className="cursor-pointer" onClick={() => {
+                            tagLists.splice(index, 1);
+                            mutate();
+                          }}/>
                         </li>
                       )}
                     </ul>
                     <input type='text' id='title' name='tag' value={tagName} className="outline-none w-full border-0" autoComplete="off" {...registerTag('name')} onChange={(e) => setTagName(e.target.value)} onKeyDown={(e) => {
                       if (e.key == "Enter"){
+                        createTag(tagName);
                         setTagLists(tagLists.concat(tagName));
-                        setTagName('');
+                        setTimeout(() => {
+                          setTagName('');
+                        }, 10)
                       }
                       if (e.key == "Backspace" && e.target.value.length == 0){
                         const tagToRemove = tagLists.pop();
