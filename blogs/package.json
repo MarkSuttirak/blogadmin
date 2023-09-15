@@ -17,6 +17,7 @@
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
     "@tiptap/extension-color": "^2.1.9",
+    "@tiptap/extension-text-style": "^2.1.9",
     "@tiptap/pm": "^2.1.9",
     "@tiptap/react": "^2.1.9",
     "@tiptap/starter-kit": "^2.1.9",
@@ -30,7 +31,8 @@
     "react-hook-form": "^7.46.1",
     "react-router-dom": "^6.15.0",
     "sass": "^1.66.1",
-    "socket.io-client": "^4.5.1"
+    "socket.io-client": "^4.5.1",
+    "tiptap": "^1.32.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.15",

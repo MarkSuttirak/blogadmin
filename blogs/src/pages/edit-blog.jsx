@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { Dialog, Transition } from '@headlessui/react'
 import { XCircleIcon, CheckCircleIcon, XMarkIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import { HomeSmile } from '@untitled-ui/icons-react/build/cjs';
-import { useFrappeCreateDoc, useFrappeGetDoc, useFrappeGetDocList, useFrappeUpdateDoc } from "frappe-react-sdk";
+import { useFrappeCreateDoc, useFrappeFileUpload, useFrappeGetDoc, useFrappeGetDocList, useFrappeUpdateDoc } from "frappe-react-sdk";
 import { Fragment, useEffect, useState } from "react";
 import { useForm } from 'react-hook-form'
 import LoadingCircle from "../components/loading";
@@ -13,10 +13,25 @@ const EditBlog = () => {
   const { id } = useParams();
 
   const { data, isLoading, error, mutate } = useFrappeGetDoc('Blog Post', id, {
-    fields: ['name', 'title', 'content', 'blog_category', 'published_on', 'blogger', 'published','_user_tags']
+    fields: ['name', 'title', 'content', 'blog_category', 'published_on', 'blogger', 'published','_user_tags','meta_image']
   })
 
-  // console.log(data)
+  const { upload, progress, loading:loadingUpload, error:errorUpload } = useFrappeFileUpload()
+
+  const fileArgs = {
+    "file_url": "http://localhost:8080/file/",
+    "doctype": "Blog Post",
+    "docname": id,
+    "fieldname": "meta_image"
+  }
+
+  const [fileImg, setFileImg] = useState();
+  const [uploaded, setUploaded] = useState(false)
+
+  const uploadImage = () => {
+    upload(fileImg, fileArgs).then(() => console.log("Upload completed")).catch((e) => console.error(e))
+    // console.log(upload(fileImg, fileArgs))
+  }
 
   const { data:dataCate } = useFrappeGetDocList('Blog Category', {
     fields: ['name', 'title']
@@ -27,6 +42,7 @@ const EditBlog = () => {
   })
 
   const { register, handleSubmit, watch, formState: {errors} } = useForm()
+  const { register:registerTag, handleSubmit:handleSubmitTag } = useForm()
 
   const { updateDoc, loading } = useFrappeUpdateDoc()
   const { createDoc } = useFrappeCreateDoc();
@@ -82,6 +98,12 @@ const EditBlog = () => {
       mutate();
       setTitle(data.title);
       setDate(data.published_on);
+      if (data.meta_image){
+        setFileImg(data.meta_image);
+        setUploaded(true)
+      } else {
+        setUploaded(false)
+      }
     }
   })
 
@@ -90,7 +112,6 @@ const EditBlog = () => {
 
   const createTag = (info) => {
     createDoc('Tag', info);
-    // console.log(info)
   }
 
   return (
@@ -185,9 +206,23 @@ const EditBlog = () => {
                   )}
                 </div>
               </div>
+
+              <div className="mt-4">
+                <label htmlFor='image' className="subheading inline-block cursor-pointer">
+                  Upload image
+                  <div className={`w-20 h-20${!uploaded ? ' bg-[#737373] ' : ' '}rounded-full overflow-hidden`}>
+                    {uploaded && <img src={fileImg} className="w-full h-full object-cover"/>}
+                    <input type='file' id='image' name='meta_image' className='hidden' accept='image/png, image/svg, image/jpg, image/jpeg' {...register('meta_image')} onChange={(e) => {
+                      setFileImg(URL.createObjectURL(e.target.files[0]))
+                      setUploaded(true);
+                      uploadImage()
+                    }} multiple="false"/>
+                  </div>
+                </label>
+              </div>
             </form>
 
-            <form onSubmit={handleSubmit(createTag)}>
+            <form onSubmit={handleSubmitTag(createTag)}>
               <div className="grid grid-cols-2 gap-x-4 mt-4">
                 <div>
                   <label htmlFor='tag' className="subheading">Tag</label>
@@ -201,7 +236,7 @@ const EditBlog = () => {
                         </li>
                       )}
                     </ul>
-                    <input type='text' id='title' name='tag' value={tagName} className="outline-none w-full" {...register('name')} onChange={(e) => setTagName(e.target.value)} onKeyDown={(e) => {
+                    <input type='text' id='title' name='tag' value={tagName} className="outline-none w-full border-0" {...registerTag('name')} onChange={(e) => setTagName(e.target.value)} onKeyDown={(e) => {
                       if (e.key == "Enter"){
                         setTagLists(tagLists.concat(tagName));
                         setTagName('');

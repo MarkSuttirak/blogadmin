@@ -15,7 +15,7 @@ const BlogPostsPublished = () => {
   const [showError, setShowError] = useState(false)
 
   const { data, isLoading, error, mutate } = useFrappeGetDocList('Blog Post', {
-    fields: ['name','title','blog_category','published_on','published'],
+    fields: ['name','title','blog_category','published_on','published','meta_image'],
     filters: [['published', '=', '1']],
     limit_start: limitData * currentPage,
     limit: limitData
@@ -166,6 +166,9 @@ const BlogPostsPublished = () => {
                             onChange={toggleAll}
                           />
                         </th>
+                        <th scope="col" className="table-head-text">
+                          Image
+                        </th>
                         <th scope="col" className="table-head-text w-[50%]">
                           Title
                         </th>
@@ -197,6 +200,9 @@ const BlogPostsPublished = () => {
                                 )
                               }
                             />
+                          </td>
+                          <td className="table-desc w-20 px-4">
+                            <img src={d.meta_image} className='rounded-full'/>
                           </td>
                           <td className="table-title w-[50%]">
                             {d.title}
