@@ -13,7 +13,11 @@ const EditBlog = () => {
   const { id } = useParams();
 
   const { data, isLoading, error, mutate } = useFrappeGetDoc('Blog Post', id, {
-    fields: ['name', 'title', 'content', 'blog_category', 'published_on', 'blogger', 'published','_user_tags','meta_image']
+    fields: ['name', 'title', 'content', 'blog_category', 'published_on', 'blogger', 'published','meta_image','_user_tags']
+  })
+
+  const { data:dataTag, mutate:mutateTag } = useFrappeGetDocList('Tag', {
+    fields: ['name']
   })
 
   const { upload, progress, loading:loadingUpload, error:errorUpload } = useFrappeFileUpload()
@@ -27,6 +31,8 @@ const EditBlog = () => {
 
   const [fileImg, setFileImg] = useState();
   const [uploaded, setUploaded] = useState()
+
+  const [focusTag, setFocusTag] = useState(false);
 
   const { data:dataCate } = useFrappeGetDocList('Blog Category', {
     fields: ['name', 'title']
@@ -50,9 +56,10 @@ const EditBlog = () => {
   const [date, setDate] = useState('')
 
   const updatePost = (data) => {
+    console.log(data);
     updateDoc('Blog Post', id, {
       ...data,
-      meta_image: uploaded
+      meta_image: uploaded,
     })
     .then(() => {
       setShowSavePost(true);
@@ -91,26 +98,30 @@ const EditBlog = () => {
     updatePublish('Blog Post', id, data)
   }
 
+  const [tagLists, setTagLists] = useState([]);
+  const [tagName, setTagName] = useState('');
+
   useEffect(() => {
-    if (data){
+    if (data && !isLoading){
       mutate();
       setTitle(data.title);
       setDate(data.published_on);
     }
-  })
-
-  useEffect(() => {
-    if (data && data.meta_image){
+    if (data && data.meta_image !== "" && !isLoading){
       setFileImg(data.meta_image);
-      setUploaded(true)
+      setUploaded(data.meta_image)
     }
-  }, [])
-
-  const [tagLists, setTagLists] = useState([]);
-  const [tagName, setTagName] = useState('');
+    if (data && data._user_tags && !isLoading){
+      const insertedTags = data._user_tags.split(',');
+      const deductFirstTags = insertedTags.splice(1, insertedTags.length)
+      setTagLists(tagLists.concat(deductFirstTags));
+  
+      console.log(tagLists)
+    }
+  }, [data])
 
   const createTag = (info) => {
-    createDoc('Tag', info);
+    createDoc('Tag', info).then(() => console.log('Created a tag')).catch(() => console.error('Cannot create a tag'))
   }
 
   return (
@@ -179,7 +190,7 @@ const EditBlog = () => {
                       .then((res) => setUploaded(res.file_url))
                       .then(() => console.log("Upload completed"))
                       .catch((e) => console.error(e))
-                    }} multiple="false"/>
+                    }} multiple={false}/>
                   </div>
                 </label>
               </div>
@@ -224,6 +235,8 @@ const EditBlog = () => {
                   )}
                 </div>
               </div>
+
+              <input type='hidden' {...register('_user_tags')} name='_user_tags' value={tagLists} onChange={setTagLists}/>
             </form>
 
             <form onSubmit={handleSubmitTag(createTag)}>
@@ -236,21 +249,31 @@ const EditBlog = () => {
                         <li key={list} className="bg-[#d1d5db] text-[#475467] px-2 inline-block rounded-lg flex items-center gap-x-1">
                           {list}
                   
-                          <XMarkIcon width='20' onClick={() => tagLists.splice(index, 1)}/>
+                          <XMarkIcon width='20' className="cursor-pointer" onClick={() => tagLists.splice(index, 1)}/>
                         </li>
                       )}
                     </ul>
-                    <input type='text' id='title' name='tag' value={tagName} className="outline-none w-full border-0" {...registerTag('name')} onChange={(e) => setTagName(e.target.value)} onKeyDown={(e) => {
+                    <input type='text' id='title' name='tag' value={tagName} className="outline-none w-full border-0" autoComplete="off" {...registerTag('name')} onChange={(e) => setTagName(e.target.value)} onKeyDown={(e) => {
                       if (e.key == "Enter"){
                         setTagLists(tagLists.concat(tagName));
                         setTagName('');
-                        createTag(e.target.value);
                       }
                       if (e.key == "Backspace" && e.target.value.length == 0){
                         const tagToRemove = tagLists.pop();
                         setTagLists(tagLists.filter(tag => tag !== tagToRemove))
                       }
-                    }}/>
+                    }} onFocus={() => setTimeout(() => setFocusTag(true), 200)} onBlur={() => setTimeout(() => setFocusTag(false), 200)}/>
+                    <div className={`overflow-auto max-h-[200px] ${focusTag ? 'block' : 'hidden'}`}>
+                      {dataTag && (
+                        <ul>
+                          {dataTag.map((d) => 
+                            <li key={d.name} onClick={() => {
+                              setTagLists(tagLists.concat(d.name));
+                            }} className="p-2 hover:bg-gray-100">{d.name}</li>
+                          )}
+                        </ul>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
