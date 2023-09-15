@@ -19,7 +19,7 @@ const EditBlog = () => {
   const { upload, progress, loading:loadingUpload, error:errorUpload } = useFrappeFileUpload()
 
   const fileArgs = {
-    "file_url": "http://localhost:8080/file/",
+    "file_url": "http://localhost:8080",
     "doctype": "Blog Post",
     "docname": id,
     "fieldname": "meta_image"
@@ -30,7 +30,6 @@ const EditBlog = () => {
 
   const uploadImage = () => {
     upload(fileImg, fileArgs).then(() => console.log("Upload completed")).catch((e) => console.error(e))
-    // console.log(upload(fileImg, fileArgs))
   }
 
   const { data:dataCate } = useFrappeGetDocList('Blog Category', {
@@ -101,8 +100,6 @@ const EditBlog = () => {
       if (data.meta_image){
         setFileImg(data.meta_image);
         setUploaded(true)
-      } else {
-        setUploaded(false)
       }
     }
   })
