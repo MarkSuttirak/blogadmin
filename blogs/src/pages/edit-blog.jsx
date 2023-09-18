@@ -6,8 +6,6 @@ import { useFrappeCreateDoc, useFrappeFileUpload, useFrappeGetDoc, useFrappeGetD
 import { Fragment, useEffect, useState } from "react";
 import { useForm } from 'react-hook-form'
 import LoadingCircle from "../components/loading";
-import { useRef } from "react";
-import { useCallback } from "react";
 
 const EditBlog = () => {
   const { id } = useParams();
@@ -59,8 +57,6 @@ const EditBlog = () => {
 
   const [title, setTitle] = useState('')
   const [date, setDate] = useState('')
-
-  console.log(data)
 
   const updatePost = (data) => {
     console.log(data);
@@ -235,7 +231,7 @@ const EditBlog = () => {
               <div className="grid grid-cols-2 gap-x-4 mt-4">
                 <div>
                   <label htmlFor='title' className="subheading">Title</label>
-                  <input type='text' id='title' name='title' defaultValue={title} className="form-input" {...register('title')} />
+                  <input type='text' id='title' name='title' value={title} className="form-input" {...register('title')} onChange={(e) => setTitle(e.target.value)}/>
                 </div>
 
                 <div>
@@ -258,13 +254,13 @@ const EditBlog = () => {
               <div className="grid grid-cols-2 gap-x-4 mt-4">
                 <div>
                   <label htmlFor='published_on' className="subheading">Published on</label>
-                  <input type='date' id='published_on' name='published_on' defaultValue={date} className="form-input" {...register('published_on')} />
+                  <input type='date' id='published_on' name='published_on' value={date} className="form-input" {...register('published_on')} onChange={(e) => setDate(e.target.value)}/>
                 </div>
 
                 <div>
                   <label htmlFor='blogger' className="subheading">Blogger</label>
                   {dataBlogger && (
-                    <select className="form-input" id='blogger' name='blogger' {...register('blogger')} defaultValue={dataBlogger.name}>
+                    <select className="form-input" id='blogger' name='blogger' {...register('blogger')} value={dataBlogger.name}>
                       {dataBlogger.map((d) => 
                         <option value={d.name}>{d.name}</option>
                       )}
