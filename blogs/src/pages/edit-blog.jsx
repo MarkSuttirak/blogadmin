@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import { Dialog, Transition } from '@headlessui/react'
 import { XCircleIcon, CheckCircleIcon, XMarkIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import { HomeSmile } from '@untitled-ui/icons-react/build/cjs';
-import { useFrappeCreateDoc, useFrappeFileUpload, useFrappeGetDoc, useFrappeGetDocList, useFrappeUpdateDoc } from "frappe-react-sdk";
+import { useFrappeCreateDoc, useFrappeFileUpload, useFrappeGetDoc, useFrappeGetDocList, useFrappeUpdateDoc, useFrappeEventListener } from "frappe-react-sdk";
 import { Fragment, useEffect, useState } from "react";
 import { useForm } from 'react-hook-form'
 import LoadingCircle from "../components/loading";
@@ -78,9 +78,9 @@ const EditBlog = () => {
 
   const publishPost = (data) => {
     updatePublish('Blog Post', id, {
+      published: 1,
       ...data,
       meta_image: uploaded,
-      published: 1,
     })
     .then(() => {
       setShowSavePost(true);
@@ -99,9 +99,9 @@ const EditBlog = () => {
 
   const unpublishPost = (data) => {
     updateUnpublish('Blog Post', id, {
+      published: 0,
       ...data,
       meta_image: uploaded,
-      published: 0,
     })
     .then(() => {
       setShowSavePost(true);
