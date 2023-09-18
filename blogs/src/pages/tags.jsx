@@ -182,6 +182,7 @@ const Tags = () => {
           </button>
         )
       }
+
       return pages;
     }
   }
@@ -369,11 +370,11 @@ const Tags = () => {
                             id="add-cate"
                             className="form-input"
                             placeholder='Enter the tag name'
-                            {...register('name', {
+                            {...register('title', {
                               required: 'This field is required.',
                             })}
                           />
-                          <p className='mt-2 text-xs '>{errors.name?.message}</p>
+                          <p className='mt-2 text-xs '>{errors.title?.message}</p>
                         </div>
                       </div>
                     </div>
@@ -442,11 +443,11 @@ const Tags = () => {
                             className="form-input"
                             placeholder='Enter the tag name'
                             defaultValue={defaultCate}
-                            {...register('name', {
+                            {...register('title', {
                               required: 'This field is required.',
                             })}
                           />
-                          <p className='mt-2 text-xs '>{errors.name?.message}</p>
+                          <p className='mt-2 text-xs '>{errors.title?.message}</p>
                         </div>
                       </div>
                     </div>

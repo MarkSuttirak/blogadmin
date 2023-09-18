@@ -2,35 +2,19 @@ import { Link, useParams } from "react-router-dom";
 import { Dialog, Transition } from '@headlessui/react'
 import { XCircleIcon, CheckCircleIcon, XMarkIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
 import { HomeSmile } from '@untitled-ui/icons-react/build/cjs';
-import { useFrappeCreateDoc, useFrappeFileUpload, useFrappeGetDoc, useFrappeGetDocList, useFrappeUpdateDoc, useFrappeEventListener } from "frappe-react-sdk";
+import { useFrappeCreateDoc, useFrappeGetDoc, useFrappeGetDocList, useFrappeUpdateDoc } from "frappe-react-sdk";
 import { Fragment, useEffect, useState } from "react";
 import { useForm } from 'react-hook-form'
 import LoadingCircle from "../components/loading";
+import { useRef } from "react";
+import { useCallback } from "react";
 
 const EditBlog = () => {
   const { id } = useParams();
 
   const { data, isLoading, error, mutate } = useFrappeGetDoc('Blog Post', id, {
-    fields: ['name', 'title', 'content', 'blog_category', 'published_on', 'blogger', 'published','meta_image','_user_tags']
+    fields: ['name', 'title', 'content', 'blog_category', 'published_on', 'blogger', 'published','_user_tags']
   })
-
-  const { data:dataTag, mutate:mutateTag } = useFrappeGetDocList('Tag', {
-    fields: ['name']
-  })
-
-  const { upload, progress, loading:loadingUpload, error:errorUpload } = useFrappeFileUpload()
-
-  const fileArgs = {
-    "isPrivate": false,
-    "doctype": "Blog Post",
-    "docname": id,
-    "fieldname": "meta_image"
-  }
-
-  const [fileImg, setFileImg] = useState();
-  const [uploaded, setUploaded] = useState()
-
-  const [focusTag, setFocusTag] = useState(false);
 
   const { data:dataCate } = useFrappeGetDocList('Blog Category', {
     fields: ['name', 'title']
@@ -40,17 +24,11 @@ const EditBlog = () => {
     fields: ['name', 'full_name']
   })
 
-  const [isPublished, setIsPublished] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [isUnpublishing, setIsUnpublishing] = useState(false);
-
   const { register, handleSubmit, watch, formState: {errors} } = useForm()
-  const { register:registerTag, handleSubmit:handleSubmitTag } = useForm()
 
   const { updateDoc, loading } = useFrappeUpdateDoc()
   const { createDoc } = useFrappeCreateDoc();
   const { updateDoc:updatePublish, loading:loadingPublish } = useFrappeUpdateDoc()
-  const { updateDoc:updateUnpublish, loading:loadingUnpublish } = useFrappeUpdateDoc()
 
   const [showSavePost, setShowSavePost] = useState(false);
   const [showError, setShowError] = useState(false);
@@ -59,11 +37,7 @@ const EditBlog = () => {
   const [date, setDate] = useState('')
 
   const updatePost = (data) => {
-    console.log(data);
-    updateDoc('Blog Post', id, {
-      ...data,
-      meta_image: uploaded,
-    })
+    updateDoc('Blog Post', id, data)
     .then(() => {
       setShowSavePost(true);
       setShowError(false)
@@ -76,75 +50,44 @@ const EditBlog = () => {
     })
   }
 
-  const publishPost = (data) => {
-    updatePublish('Blog Post', id, {
-      published: 1,
-      ...data,
-      meta_image: uploaded,
-    })
+  const addBlogCate = (data) => {
+    createCate('Blog Category', data)
     .then(() => {
-      setShowSavePost(true);
+      mutate()
+      setOpenAddCate(false);
+      setShowAddNotification(true);
       setShowError(false);
-      setIsPublishing(false);
-      setIsPublished(true);
-    }).catch(() => {
-      setShowSavePost(true);
-      setShowError(true)
-      setIsPublishing(false);
       setTimeout(() => {
-        setShowSavePost(false)
+        setShowAddNotification(false)
+      }, 10000)
+    })
+    .catch(() => {
+      setOpenAddCate(false);
+      setShowAddNotification(true);
+      setShowError(true);
+      setTimeout(() => {
+        setShowAddNotification(false)
       }, 10000)
     })
   }
 
-  const unpublishPost = (data) => {
-    updateUnpublish('Blog Post', id, {
-      published: 0,
-      ...data,
-      meta_image: uploaded,
-    })
-    .then(() => {
-      setShowSavePost(true);
-      setShowError(false);
-      setIsUnpublishing(true);
-      setIsPublished(false);
-    }).catch(() => {
-      setShowSavePost(true);
-      setShowError(true)
-      setIsUnpublishing(true);
-      setTimeout(() => {
-        setShowSavePost(false)
-      }, 10000)
-    })
+  const publishPost = (data) => {
+    updatePublish('Blog Post', id, data)
   }
+
+  useEffect(() => {
+    if (data){
+      mutate();
+      setTitle(data.title);
+      setDate(data.published_on);
+    }
+  })
 
   const [tagLists, setTagLists] = useState([]);
   const [tagName, setTagName] = useState('');
 
-  useEffect(() => {
-    if (data && !isLoading){
-      mutate();
-      setTitle(data.title);
-      setDate(data.published_on);
-      if (data.published === 1){
-        setIsPublished(true);
-      } else {
-        setIsPublished(false);
-      }
-    }
-    if (data && data.meta_image !== "" && !isLoading){
-      setFileImg(data.meta_image);
-      setUploaded(data.meta_image)
-    }
-    if (data && data._user_tags && !isLoading){
-      const insertedTags = data._user_tags.split(',');
-      const deductFirstTags = insertedTags.splice(1, insertedTags.length)
-      setTagLists(tagLists.concat(deductFirstTags));
-    }
-  }, [data])
-
   const createTag = (info) => {
-    createDoc('Tag', info).then(() => console.log('Created a tag')).catch(() => console.error('Cannot create a tag'))
+    createDoc('Tag', info);
   }
 
   return (
@@ -179,29 +122,16 @@ const EditBlog = () => {
         </nav>
         {data && (
           <>
-            <form onSubmit={isPublishing ? handleSubmit(publishPost) : isUnpublishing ? handleSubmit(unpublishPost) : handleSubmit(updatePost)}>
+            <form onSubmit={handleSubmit(updatePost)}>
               <div className="flex items-center justify-between mb-8">
                 <h1 className="main-title">Edit Post: {data.title}</h1>
                 <div className="flex gap-x-4">
-                  <Link to={`/view-post/${id}`} className="btn secondary-btn">
-                    Preview
-                  </Link>
                   <button
                     type='submit'
-                    className="btn secondary-btn"
-                    onClick={() => {
-                      if (isPublished){
-                        setIsUnpublishing(true)
-                      } else {
-                        setIsPublishing(true)
-                      }
-                    }}
+                    className="btn primary-btn"
+                    {...register('published')}
                   >
-                    {!isPublished ? (
-                      <>{loadingPublish ? 'Publishing...' : 'Publish'}</>
-                    ) : (
-                      <>{loadingUnpublish ? 'Unpublishing...' : 'Unpublish'}</>
-                    )}
+                    {loadingPublish ? 'Publishing...' : 'Publish'}
                   </button>
                   <button
                     type='submit'
@@ -212,26 +142,10 @@ const EditBlog = () => {
                 </div>
               </div>
 
-              <div>
-                <label htmlFor='image' className="subheading inline-block cursor-pointer">
-                  Blog image
-                  <div className={`w-[180px] h-[120px]${!uploaded ? ' bg-[#737373] ' : ' '}rounded-lg overflow-hidden`}>
-                    {uploaded && <img src={fileImg} className="w-full h-full object-cover"/>}
-                    <input type='file' id='image' name='meta_image' className='hidden' accept='image/png, image/svg, image/jpg, image/jpeg' {...register('meta_image')} onChange={(e) => {
-                      setFileImg(URL.createObjectURL(e.target.files[0]))
-                      upload(e.target.files[0], fileArgs)
-                      .then((res) => setUploaded(res.file_url))
-                      .then(() => console.log("Upload completed"))
-                      .catch((e) => console.error(e))
-                    }} multiple={false}/>
-                  </div>
-                </label>
-              </div>
-
-              <div className="grid grid-cols-2 gap-x-4 mt-4">
+              <div className="grid grid-cols-2 gap-x-4">
                 <div>
                   <label htmlFor='title' className="subheading">Title</label>
-                  <input type='text' id='title' name='title' value={title} className="form-input" {...register('title')} onChange={(e) => setTitle(e.target.value)}/>
+                  <input type='text' id='title' name='title' defaultValue={title} className="form-input" {...register('title')} />
                 </div>
 
                 <div>
@@ -254,13 +168,13 @@ const EditBlog = () => {
               <div className="grid grid-cols-2 gap-x-4 mt-4">
                 <div>
                   <label htmlFor='published_on' className="subheading">Published on</label>
-                  <input type='date' id='published_on' name='published_on' value={date} className="form-input" {...register('published_on')} onChange={(e) => setDate(e.target.value)}/>
+                  <input type='date' id='published_on' name='published_on' defaultValue={date} className="form-input" {...register('published_on')} />
                 </div>
 
                 <div>
                   <label htmlFor='blogger' className="subheading">Blogger</label>
                   {dataBlogger && (
-                    <select className="form-input" id='blogger' name='blogger' {...register('blogger')} value={dataBlogger.name}>
+                    <select className="form-input" id='blogger' name='blogger' {...register('blogger')} defaultValue={dataBlogger.name}>
                       {dataBlogger.map((d) => 
                         <option value={d.name}>{d.name}</option>
                       )}
@@ -268,55 +182,34 @@ const EditBlog = () => {
                   )}
                 </div>
               </div>
-
-              <input type='hidden' {...register('_user_tags')} name='_user_tags' value={tagLists} onChange={setTagLists}/>
             </form>
 
-            <form onSubmit={handleSubmitTag(createTag)}>
-              <div className="grid grid-cols-2 gap-x-4 mt-4">
-                <div>
-                  <label htmlFor='tag' className="subheading">Tag</label>
-                  <div className="form-input-tag">
-                    <ul className="inline-flex gap-2 flex-wrap" id='tag-lists'>
-                      {tagLists.map((list, index) => 
-                        <li key={list} className="bg-[#d1d5db] text-[#475467] px-2 inline-block rounded-lg flex items-center gap-x-1">
-                          {list}
-                  
-                          <XMarkIcon width='20' className="cursor-pointer" onClick={() => {
-                            tagLists.splice(index, 1);
-                            mutate();
-                          }}/>
-                        </li>
-                      )}
-                    </ul>
-                    <input type='text' id='title' name='tag' value={tagName} className="outline-none w-full border-0" autoComplete="off" {...registerTag('name')} onChange={(e) => setTagName(e.target.value)} onKeyDown={(e) => {
-                      if (e.key == "Enter"){
-                        createTag(tagName);
-                        setTagLists(tagLists.concat(tagName));
-                        setTimeout(() => {
-                          setTagName('');
-                        }, 10)
-                      }
-                      if (e.key == "Backspace" && e.target.value.length == 0){
-                        const tagToRemove = tagLists.pop();
-                        setTagLists(tagLists.filter(tag => tag !== tagToRemove))
-                      }
-                    }} onFocus={() => setTimeout(() => setFocusTag(true), 200)} onBlur={() => setTimeout(() => setFocusTag(false), 200)}/>
-                    <div className={`overflow-auto max-h-[200px] ${focusTag ? 'block' : 'hidden'}`}>
-                      {dataTag && (
-                        <ul>
-                          {dataTag.map((d) => 
-                            <li key={d.name} onClick={() => {
-                              setTagLists(tagLists.concat(d.name));
-                            }} className="p-2 hover:bg-gray-100">{d.name}</li>
-                          )}
-                        </ul>
-                      )}
-                    </div>
-                  </div>
+            <div className="grid grid-cols-2 gap-x-4 mt-4">
+              <div>
+                <label htmlFor='tag' className="subheading">Tag</label>
+                <div className="form-input-tag">
+                  <ul className="inline-flex gap-2 flex-wrap" id='tag-lists'>
+                    {tagLists.map((list, index) => 
+                      <li key={list} className="bg-[#d1d5db] text-[#475467] px-2 inline-block rounded-lg flex items-center gap-x-1">
+                        {list}
+                
+                        <XMarkIcon width='20' onClick={() => tagLists.splice(index, 1)}/>
+                      </li>
+                    )}
+                  </ul>
+                  <input type='text' id='title' name='tag' value={tagName} className="outline-none w-full" {...register('_user_tag')} onChange={(e) => setTagName(e.target.value)} onKeyDown={(e) => {
+                    if (e.key == "Enter"){
+                      setTagLists(tagLists.concat(tagName));
+                      setTagName('');
+                      createTag(e.target.value);
+                    }
+                    if (e.key == "Backspace" && e.target.value.length == 0){
+                      tagLists.pop();
+                    }
+                  }}/>
                 </div>
               </div>
-            </form>
+            </div>
           </>
         )}
 
