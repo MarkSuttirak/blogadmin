@@ -34,14 +34,19 @@ const AddBlog = () => {
   const onSave = async () => {
     try {
       const outputData = await editor.save()
-      console.log('Article data: ', outputData)
+      console.log(outputData.blocks);
     } catch (e) {
       console.log('Saving failed: ', e)
     }
   }
 
 
-  const createPost = (data) => {
+  const createPost = async (data) => {
+    const outputData = await editor.save()
+    const postcontent = outputData.blocks;
+
+    data.content_html = postcontent;
+
     createDoc('Blog Post', data)
     .then(() => {
       setShowSavePost(true);
