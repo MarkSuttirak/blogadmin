@@ -48,6 +48,9 @@ const AddBlog = () => {
   const { createDoc, loading } = useFrappeCreateDoc()
   const { createDoc:createPublish, loading:loadingPublish } = useFrappeCreateDoc()
 
+  const [isPublished, setIsPublished] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+
   const [showSavePost, setShowSavePost] = useState(false);
   const [showError, setShowError] = useState(false);
   const [postcontent, Setpostcontent] = useState();
@@ -236,7 +239,6 @@ const MenuBar = () => {
   )
 }
 
-
   const createPost = (data) => {
 
     data.content_html = postcontent;
@@ -251,6 +253,27 @@ const MenuBar = () => {
     }).catch(() => {
       setShowSavePost(true);
       setShowError(true)
+      setTimeout(() => {
+        setShowSavePost(false)
+      }, 10000)
+    })
+  }
+
+  const publishPost = (data) => {
+    createPublish('Blog Post', id, {
+      ...data,
+      meta_image: uploaded,
+      published: 1,
+    })
+    .then(() => {
+      setShowSavePost(true);
+      setShowError(false);
+      setIsPublishing(false);
+      setIsPublished(true);
+    }).catch(() => {
+      setShowSavePost(true);
+      setShowError(true)
+      setIsPublishing(false);
       setTimeout(() => {
         setShowSavePost(false)
       }, 10000)
@@ -287,12 +310,12 @@ const MenuBar = () => {
             </li>
           </ol>
         </nav>
-        <form onSubmit={handleSubmit(createPost)}>
+        <form onSubmit={isPublishing ? handleSubmit(publishPost) : handleSubmit(createPost)}>
           <div className="flex items-center justify-between mb-8">
             <h1 className="main-title">Add Post</h1>
             <div className="flex gap-x-4">
               <button
-                {...register('published')}
+                onClick={() => setIsPublishing(true)}
                 className="btn secondary-btn"
               >
                 {loadingPublish ? 'Publishing...' : 'Publish'}

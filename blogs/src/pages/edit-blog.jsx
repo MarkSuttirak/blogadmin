@@ -42,18 +42,25 @@ const EditBlog = () => {
     fields: ['name', 'full_name']
   })
 
+  const [isPublished, setIsPublished] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isUnpublishing, setIsUnpublishing] = useState(false);
+
   const { register, handleSubmit, watch, formState: {errors} } = useForm()
   const { register:registerTag, handleSubmit:handleSubmitTag } = useForm()
 
   const { updateDoc, loading } = useFrappeUpdateDoc()
   const { createDoc } = useFrappeCreateDoc();
   const { updateDoc:updatePublish, loading:loadingPublish } = useFrappeUpdateDoc()
+  const { updateDoc:updateUnpublish, loading:loadingUnpublish } = useFrappeUpdateDoc()
 
   const [showSavePost, setShowSavePost] = useState(false);
   const [showError, setShowError] = useState(false);
 
   const [title, setTitle] = useState('')
   const [date, setDate] = useState('')
+
+  console.log(data)
 
   const updatePost = (data) => {
     console.log(data);
@@ -73,29 +80,46 @@ const EditBlog = () => {
     })
   }
 
-  const addBlogCate = (data) => {
-    createCate('Blog Category', data)
-    .then(() => {
-      mutate()
-      setOpenAddCate(false);
-      setShowAddNotification(true);
-      setShowError(false);
-      setTimeout(() => {
-        setShowAddNotification(false)
-      }, 10000)
+  const publishPost = (data) => {
+    updatePublish('Blog Post', id, {
+      ...data,
+      meta_image: uploaded,
+      published: 1,
     })
-    .catch(() => {
-      setOpenAddCate(false);
-      setShowAddNotification(true);
-      setShowError(true);
+    .then(() => {
+      setShowSavePost(true);
+      setShowError(false);
+      setIsPublishing(false);
+      setIsPublished(true);
+    }).catch(() => {
+      setShowSavePost(true);
+      setShowError(true)
+      setIsPublishing(false);
       setTimeout(() => {
-        setShowAddNotification(false)
+        setShowSavePost(false)
       }, 10000)
     })
   }
 
-  const publishPost = (data) => {
-    updatePublish('Blog Post', id, data)
+  const unpublishPost = (data) => {
+    updateUnpublish('Blog Post', id, {
+      ...data,
+      meta_image: uploaded,
+      published: 0,
+    })
+    .then(() => {
+      setShowSavePost(true);
+      setShowError(false);
+      setIsUnpublishing(true);
+      setIsPublished(false);
+    }).catch(() => {
+      setShowSavePost(true);
+      setShowError(true)
+      setIsUnpublishing(true);
+      setTimeout(() => {
+        setShowSavePost(false)
+      }, 10000)
+    })
   }
 
   const [tagLists, setTagLists] = useState([]);
@@ -106,6 +130,11 @@ const EditBlog = () => {
       mutate();
       setTitle(data.title);
       setDate(data.published_on);
+      if (data.published === 1){
+        setIsPublished(true);
+      } else {
+        setIsPublished(false);
+      }
     }
     if (data && data.meta_image !== "" && !isLoading){
       setFileImg(data.meta_image);
@@ -154,7 +183,7 @@ const EditBlog = () => {
         </nav>
         {data && (
           <>
-            <form onSubmit={handleSubmit(updatePost)}>
+            <form onSubmit={isPublishing ? handleSubmit(publishPost) : isUnpublishing ? handleSubmit(unpublishPost) : handleSubmit(updatePost)}>
               <div className="flex items-center justify-between mb-8">
                 <h1 className="main-title">Edit Post: {data.title}</h1>
                 <div className="flex gap-x-4">
@@ -164,9 +193,19 @@ const EditBlog = () => {
                   <button
                     type='submit'
                     className="btn secondary-btn"
-                    {...register('published')}
+                    onClick={() => {
+                      if (isPublished){
+                        setIsUnpublishing(true)
+                      } else {
+                        setIsPublishing(true)
+                      }
+                    }}
                   >
-                    {loadingPublish ? 'Publishing...' : 'Publish'}
+                    {!isPublished ? (
+                      <>{loadingPublish ? 'Publishing...' : 'Publish'}</>
+                    ) : (
+                      <>{loadingUnpublish ? 'Unpublishing...' : 'Unpublish'}</>
+                    )}
                   </button>
                   <button
                     type='submit'

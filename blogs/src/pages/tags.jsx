@@ -182,7 +182,6 @@ const Tags = () => {
           </button>
         )
       }
-
       return pages;
     }
   }
